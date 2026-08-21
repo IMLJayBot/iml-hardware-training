@@ -150,12 +150,15 @@
     color:var(--muted);
   }
 
+  /* All "Back to Menu" buttons app-wide share this light green (per user
+     request to match the Knowledge Check button everywhere). Muted pastel
+     green, not the original fluorescent #61FF00 pick. */
   .back-to-menu-btn{
     display:inline-flex;
     align-items:center;
     gap:6px;
-    background:#fff;
-    border:1px solid var(--line);
+    background:#97D89A;
+    border:1px solid #97D89A;
     color:var(--navy);
     padding:9px 16px;
     border-radius:9px;
@@ -165,7 +168,8 @@
     margin-bottom:18px;
   }
   .back-to-menu-btn:hover{
-    border-color:var(--accent-2);
+    background:#7FC784;
+    border-color:#7FC784;
   }
 
   .deck-topbar{
@@ -569,6 +573,17 @@
    ========================================================= */
 
 const CATALOG = [
+  {
+    id: "sales-questions",
+    name: "Sales Questions",
+    subcategories: [
+      { id: "sq-locksets", name: "Locksets", cards: [] },
+      { id: "sq-cylinders", name: "Cylinders", cards: [] },
+      { id: "sq-keyways", name: "Keyways", cards: [] },
+      { id: "sq-exit-devices", name: "Exit Devices", cards: [] },
+      { id: "sq-door-closers", name: "Door Closers", cards: [] }
+    ]
+  },
   {
     id: "cylindrical-locksets",
     name: "Locksets",
