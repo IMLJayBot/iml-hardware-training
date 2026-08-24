@@ -1068,7 +1068,7 @@ function renderMenuPage(){
     btn.addEventListener("click", ()=> goToSubcategories(btn.dataset.cat));
   });
   document.getElementById("resetProgressBtn").addEventListener("click", ()=>{
-    if(confirm("Reset all study and Knowledge Check progress on this device? This can't be undone.")){
+    if(confirm("Reset all study and quiz progress on this device? This can't be undone.")){
       resetAllProgress();
       renderMenuPage();
     }
@@ -1241,7 +1241,7 @@ function renderStudyPage(){
 
   const nextControlHtml = isLast
     ? (canQuiz
-        ? `<button class="ctrl-btn" id="toQuizBtn">Knowledge Check &rarr;</button>`
+        ? `<button class="ctrl-btn" id="toQuizBtn">Quiz &rarr;</button>`
         : `<button class="ctrl-btn secondary" id="nextBtn" disabled>Next &rarr;</button>`)
     : `<button class="ctrl-btn secondary" id="nextBtn">Next &rarr;</button>`;
 
@@ -1250,7 +1250,7 @@ function renderStudyPage(){
   // has already turned into the Knowledge Check button itself, so showing
   // both at once would just be a confusing duplicate of the same action.
   const quizIconHtml = (canQuiz && !isLast)
-    ? `<button class="ctrl-btn icon-btn quiz-icon-btn" id="quizIconBtn" aria-label="Knowledge Check" title="Knowledge Check">${quizIconSVG()}</button>`
+    ? `<button class="ctrl-btn icon-btn quiz-icon-btn" id="quizIconBtn" aria-label="Quiz" title="Quiz">${quizIconSVG()}</button>`
     : "";
 
   // If we've already measured this subcategory's tallest card (true for every
@@ -1433,7 +1433,7 @@ function renderQuizPage(){
     <div class="deck-topbar">
       <div class="deck-topbar-left">
         ${homeIconBtnHtml("backToMenuBtn")}
-        <div class="crumb"><b>${cat.name}</b> / ${sub.name} / Knowledge Check</div>
+        <div class="crumb"><b>${cat.name}</b> / ${sub.name} / Quiz</div>
       </div>
     </div>
   `;
@@ -1462,7 +1462,7 @@ function renderQuizPage(){
           </div>
           <div class="quiz-actions">
             <button class="ctrl-btn secondary" id="backToStudyBtn">&larr; Back to Study Cards</button>
-            <button class="ctrl-btn" id="retakeBtn">Retake Knowledge Check</button>
+            <button class="ctrl-btn" id="retakeBtn">Retake Quiz</button>
           </div>
         </div>
       </div>
