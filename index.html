@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-08-24T18:30:24Z">
+<meta name="app-version" content="2026-08-24T18:41:35Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -414,14 +414,49 @@
     margin-top:20px;
     padding-top:18px;
     border-top:1px dashed var(--line);
-    font-size:14.5px;
-    color:var(--ink);
-    line-height:1.55;
     max-width:460px;
     width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    text-align:left;
   }
-  .study-facts b{color:var(--navy-2);}
-  .study-facts ul{margin:0;padding-left:20px;}
+  .fact-tile{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    background:linear-gradient(160deg,#f8fafc,#eef2f7);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .fact-icon{
+    flex:none;
+    width:32px;
+    height:32px;
+    border-radius:9px;
+    background:#fff;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--accent);
+  }
+  .fact-icon svg{width:17px;height:17px;}
+  .fact-body{flex:1;min-width:0;}
+  .fact-label{
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:3px;
+  }
+  .fact-text{
+    font-size:14px;
+    line-height:1.5;
+    color:var(--ink);
+  }
 
   /* ---------------- Knowledge Check (quiz) ---------------- */
   .quiz-card{
@@ -673,7 +708,8 @@
     }
 
     .study-title{font-size:22px;}
-    .study-facts{font-size:14px;}
+    .fact-tile{padding:11px 12px;gap:10px;}
+    .fact-text{font-size:13.5px;}
 
     .quiz-prompt{font-size:14.5px;}
     .quiz-choice-btn{font-size:14px;padding:12px 14px;min-height:48px;}
@@ -754,8 +790,10 @@
                   (omit or set to "" if not needed)
      answer: short name for the card - used as the study-card title
              fallback AND as the correct Knowledge Check choice
-     tips: string/HTML with the study-card facts (Operation/Behavior/
-           Best For, etc.) - rendered as raw HTML, so <b>/<ul>/<li> work
+     facts: array of { icon, label, text } - each renders as a labeled
+            tile (icon + uppercase label + description) via renderFacts().
+            icon must be one of "operation" / "behavior" / "bestFor"
+            (see factIconSVG) - add a new case there for any other icon.
    }
 
    TO ADD A REAL PHOTO LATER:
@@ -789,7 +827,11 @@ const CATALOG = [
             },
             description: "Always open, no cylinder, uses a springlatch.",
             answer: "Passage",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Non-locking plain latchset, always open, uses a springlatch.</li><li><b>Behavior:</b> Free operation from both sides at all times.</li><li><b>Best For:</b> Corridors, break rooms, interior utility closets.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Non-locking plain latchset, always open, uses a springlatch." },
+              { icon: "behavior", label: "Behavior", text: "Free operation from both sides at all times." },
+              { icon: "bestFor", label: "Best For", text: "Corridors, break rooms, interior utility closets." }
+            ]
           },
           {
             id: "privacy",
@@ -801,7 +843,11 @@ const CATALOG = [
             },
             description: "Bathroom lock, no outside cylinder, inside locks with a push or push/turn button, can open with a coin or special tool, uses a springlatch.",
             answer: "Privacy",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Inside push-button or thumb-turn; emergency slot/pinhole release outside, uses a springlatch.</li><li><b>Behavior:</b> Pushing the inside button locks the exterior lever until unlocked by exit. The exterior lever remains locked upon exit only when the inside push/turn button is pushed and rotated.</li><li><b>Best For:</b> Single-occupant restrooms, dressing rooms, nursing suites.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Inside push-button or thumb-turn; emergency slot/pinhole release outside, uses a springlatch." },
+              { icon: "behavior", label: "Behavior", text: "Pushing the inside button locks the exterior lever until unlocked by exit. The exterior lever remains locked upon exit only when the inside push/turn button is pushed and rotated." },
+              { icon: "bestFor", label: "Best For", text: "Single-occupant restrooms, dressing rooms, nursing suites." }
+            ]
           },
           {
             id: "entry",
@@ -813,7 +859,11 @@ const CATALOG = [
             },
             description: "Keyed outside cylinder, inside locks with a push/turn button, uses a deadlatch.",
             answer: "Entry",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Key outside, push/turn button inside. Free egress inside, uses a deadlatch.</li><li><b>Behavior:</b> Pressing the inside push/turn button locks the outside lever until unlocked by key or exit. The outside lever remains locked upon exit only when the inside push/turn button is pushed and rotated.</li><li><b>Best For:</b> Perimeter doors, exterior entryways, multi-family units.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Key outside, push/turn button inside. Free egress inside, uses a deadlatch." },
+              { icon: "behavior", label: "Behavior", text: "Pressing the inside push/turn button locks the outside lever until unlocked by key or exit. The outside lever remains locked upon exit only when the inside push/turn button is pushed and rotated." },
+              { icon: "bestFor", label: "Best For", text: "Perimeter doors, exterior entryways, multi-family units." }
+            ]
           },
           {
             id: "office",
@@ -825,7 +875,11 @@ const CATALOG = [
             },
             description: "Keyed outside cylinder, inside locks with a push-button, uses a deadlatch.",
             answer: "Office",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Key outside, inside push-button. Free egress inside, uses a deadlatch.</li><li><b>Behavior:</b> Pushing the inside button locks the exterior lever. Turning the inside lever or using the key unlocks the exterior to prevent accidental lockouts.</li><li><b>Best For:</b> Private offices, consulting rooms, conference spaces.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Key outside, inside push-button. Free egress inside, uses a deadlatch." },
+              { icon: "behavior", label: "Behavior", text: "Pushing the inside button locks the exterior lever. Turning the inside lever or using the key unlocks the exterior to prevent accidental lockouts." },
+              { icon: "bestFor", label: "Best For", text: "Private offices, consulting rooms, conference spaces." }
+            ]
           },
           {
             id: "storeroom",
@@ -837,7 +891,11 @@ const CATALOG = [
             },
             description: "Always locked, key momentarily retracts the deadlatch, free egress inside.",
             answer: "Storeroom",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Key outside momentarily retracts deadlatch; outside lever is always locked. Free egress inside.</li><li><b>Behavior:</b> The exterior is permanently locked and cannot be left in an unlocked state.</li><li><b>Best For:</b> Storage closets, mechanical/electrical rooms, IT server rooms, access control.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Key outside momentarily retracts deadlatch; outside lever is always locked. Free egress inside." },
+              { icon: "behavior", label: "Behavior", text: "The exterior is permanently locked and cannot be left in an unlocked state." },
+              { icon: "bestFor", label: "Best For", text: "Storage closets, mechanical/electrical rooms, IT server rooms, access control." }
+            ]
           },
           {
             id: "institutional-asylum",
@@ -849,7 +907,11 @@ const CATALOG = [
             },
             description: "Keyed cylinders on both sides, no free egress without a key — both levers stay locked at all times, uses a deadlatch.",
             answer: "Institution / Asylum",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Key cylinder on both inside and outside levers; both levers remain locked at all times, uses a deadlatch.</li><li><b>Behavior:</b> Deadlatch is momentarily retracted only by key from either side. No free egress (life safety override requires specialized facility authorization).</li><li><b>Best For:</b> Detention facilities, psychiatric wards, secured holding areas.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Key cylinder on both inside and outside levers; both levers remain locked at all times, uses a deadlatch." },
+              { icon: "behavior", label: "Behavior", text: "Deadlatch is momentarily retracted only by key from either side. No free egress (life safety override requires specialized facility authorization)." },
+              { icon: "bestFor", label: "Best For", text: "Detention facilities, psychiatric wards, secured holding areas." }
+            ]
           },
           {
             id: "classroom",
@@ -861,7 +923,11 @@ const CATALOG = [
             },
             description: "Key outside toggles the outside lever locked/unlocked with a full 360° turn; no interior lock button, free egress inside, uses a deadlatch.",
             answer: "Classroom",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Key outside locks or unlocks the outside lever via a full 360\u00b0 key rotation. Free egress inside. No interior button, uses a deadlatch.</li><li><b>Behavior:</b> Rotating the exterior key 360\u00b0 toggles the outside lever between locked and unlocked states. Cannot be locked from the inside.</li><li><b>Best For:</b> Traditional classrooms, seminar rooms, administrative shared spaces.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Key outside locks or unlocks the outside lever via a full 360\u00b0 key rotation. Free egress inside. No interior button, uses a deadlatch." },
+              { icon: "behavior", label: "Behavior", text: "Rotating the exterior key 360\u00b0 toggles the outside lever between locked and unlocked states. Cannot be locked from the inside." },
+              { icon: "bestFor", label: "Best For", text: "Traditional classrooms, seminar rooms, administrative shared spaces." }
+            ]
           },
           {
             id: "classroom-security-intruder",
@@ -873,7 +939,11 @@ const CATALOG = [
             },
             description: "Keyed cylinders on both sides; either key locks/unlocks the outside lever via full 360° turn, free egress inside at all times, uses a deadlatch.",
             answer: "Classroom Security / Intruder",
-            tips: "<ul style=\"text-align:left;margin:0;padding-left:20px;\"><li><b>Operation:</b> Key cylinder on both inside and outside levers. Free egress inside at all times, uses a deadlatch.</li><li><b>Behavior:</b> Turning either key cylinder 360\u00b0 locks or unlocks the outside lever, allowing staff to secure the door from inside without stepping into the hallway.</li><li><b>Best For:</b> K-12 schools, higher-ed classrooms, lecture halls, lockdown-sensitive spaces.</li></ul>"
+            facts: [
+              { icon: "operation", label: "Operation", text: "Key cylinder on both inside and outside levers. Free egress inside at all times, uses a deadlatch." },
+              { icon: "behavior", label: "Behavior", text: "Turning either key cylinder 360\u00b0 locks or unlocks the outside lever, allowing staff to secure the door from inside without stepping into the hallway." },
+              { icon: "bestFor", label: "Best For", text: "K-12 schools, higher-ed classrooms, lecture halls, lockdown-sensitive spaces." }
+            ]
           }
         ]
       },
@@ -1014,6 +1084,49 @@ function placeholderSVG(){
     <path d="M7 10V7a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="1.6"/>
     <circle cx="12" cy="15" r="1.6" fill="currentColor"/>
   </svg>`;
+}
+
+/* =========================================================
+   STUDY-CARD FACTS
+   -----------------------------------------------------------
+   Each card's Operation/Behavior/Best For facts render as labeled tiles
+   (icon + small uppercase label + description) rather than a plain
+   bulleted list, so they read like a mobile spec sheet instead of a
+   pasted Word-doc outline.
+   ========================================================= */
+function factIconSVG(kind){
+  const icons = {
+    // Operation — a gear, for "how the mechanism works."
+    operation: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M12 3.7v2.1M12 18.2v2.1M20.3 12h-2.1M5.8 12H3.7M17.6 6.4l-1.5 1.5M7.9 16.1l-1.5 1.5M17.6 17.6l-1.5-1.5M7.9 7.9 6.4 6.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>`,
+    // Behavior — two opposing arrows, for "what happens when you use it."
+    behavior: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 8.5h13.5M17.5 8.5l-3-3M17.5 8.5l-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20 15.5H6.5M6.5 15.5l3-3M6.5 15.5l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+    // Best For — a location pin, for "where this fits."
+    bestFor: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 21s-6.5-5.8-6.5-11.2A6.5 6.5 0 0 1 18.5 9.8C18.5 15.2 12 21 12 21Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="12" cy="9.8" r="2.2" stroke="currentColor" stroke-width="1.6"/>
+    </svg>`
+  };
+  return icons[kind] || "";
+}
+
+function renderFacts(facts){
+  if(!facts || !facts.length) return "";
+  return `<div class="study-facts">
+    ${facts.map(f => `
+      <div class="fact-tile">
+        <div class="fact-icon">${factIconSVG(f.icon)}</div>
+        <div class="fact-body">
+          <div class="fact-label">${f.label}</div>
+          <div class="fact-text">${f.text}</div>
+        </div>
+      </div>`).join("")}
+  </div>`;
 }
 
 function homeIconSVG(){
@@ -1185,7 +1298,7 @@ function studyCardInnerHTML(c){
   return `
         <h3 class="study-title">${c.title || c.answer}</h3>
         ${photosHtml}
-        <div class="study-facts">${c.tips || ""}</div>`;
+        ${renderFacts(c.facts)}`;
 }
 
 // Measures every card's natural height using the SAME live element that is
@@ -1310,7 +1423,7 @@ function renderStudyPage(){
       <div class="study-card" id="studyCardEl"${studyCardStyle}>
         <h3 class="study-title">${card.title || card.answer}</h3>
         ${photosHtml}
-        <div class="study-facts">${card.tips || ""}</div>
+        ${renderFacts(card.facts)}
       </div>
       <div class="swipe-hint">Swipe the card left/right, or use Prev/Next</div>
 
