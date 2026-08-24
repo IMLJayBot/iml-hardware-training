@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-08-24T23:16:11Z">
+<meta name="app-version" content="2026-08-24T23:28:18Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -333,6 +333,25 @@
     color:var(--muted);
   }
   .crumb b{color:var(--ink);}
+  /* The category half of the breadcrumb is a real button: from a card you can
+     jump straight back to the subcategory list instead of routing through the
+     menu. Padding/negative-margin widens the tap target without moving it. */
+  .crumb-back{
+    appearance:none;
+    background:none;
+    border:none;
+    font:inherit;
+    font-weight:700;
+    color:var(--accent);
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    padding:7px 4px;
+    margin:-7px -4px;
+    border-radius:6px;
+  }
+  .crumb-back:hover{color:var(--navy);background:#e8edf5;}
+  .crumb-back:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .progress-pill{
     font-size:12.5px;
     font-weight:700;
@@ -1531,6 +1550,7 @@ function renderSubcategoriesPage(){
     </div>
   `;
   document.getElementById("backToMenuBtn").addEventListener("click", goToMenu);
+  wireCrumbBack();
   appRoot.querySelectorAll(".tile[data-sub]").forEach(btn=>{
     if(btn.disabled) return;
     btn.addEventListener("click", ()=> goToStudy(state.categoryId, btn.dataset.sub));
@@ -1604,6 +1624,13 @@ async function equalizeStudyCardHeight(sub, studyCardEl, cacheKey){
   studyCardEl.style.minHeight = max + "px";
 }
 
+// Wires the breadcrumb back-button on whichever page just rendered. Safe to
+// call when the page has no crumb — it simply finds nothing.
+function wireCrumbBack(){
+  const b = document.getElementById("backToSubcatsBtn");
+  if(b) b.addEventListener("click", ()=> goToSubcategories(state.categoryId));
+}
+
 function renderStudyPage(){
   const cat = getCategory(state.categoryId);
   const sub = getSubcat(state.categoryId, state.subcatId);
@@ -1619,7 +1646,7 @@ function renderStudyPage(){
   const topbar = `
     <div class="deck-topbar">
       <div class="deck-topbar-left">
-        <div class="crumb"><b>${cat.name}</b> / ${sub.name}</div>
+        <div class="crumb"><button class="crumb-back" id="backToSubcatsBtn" title="Back to ${cat.name}">&larr; ${cat.name}</button> / ${sub.name}</div>
       </div>
       <div class="deck-topbar-right">
         ${sub.cards.length ? `<div class="progress-pill">Card ${state.cardIndex+1} of ${sub.cards.length}</div>` : ""}
@@ -1637,7 +1664,7 @@ function renderStudyPage(){
         <div class="deck-topbar">
           <div class="deck-topbar-left">
             ${homeIconBtnHtml("backToMenuBtn")}
-            <div class="crumb"><b>${cat.name}</b> / ${sub.name}</div>
+            <div class="crumb"><button class="crumb-back" id="backToSubcatsBtn" title="Back to ${cat.name}">&larr; ${cat.name}</button> / ${sub.name}</div>
           </div>
         </div>
         <div class="empty-state">
@@ -1647,6 +1674,7 @@ function renderStudyPage(){
       </div>
     `;
     document.getElementById("backToMenuBtn").addEventListener("click", goToMenu);
+  wireCrumbBack();
     return;
   }
 
@@ -1704,6 +1732,7 @@ function renderStudyPage(){
   document.body.classList.add("has-controls");
 
   document.getElementById("homeBtn").addEventListener("click", goToMenu);
+  wireCrumbBack();
   document.getElementById("prevBtn").addEventListener("click", goPrev);
   const nextBtn = document.getElementById("nextBtn");
   if(nextBtn) nextBtn.addEventListener("click", goNext);
@@ -1854,7 +1883,7 @@ function renderQuizPage(){
     <div class="deck-topbar">
       <div class="deck-topbar-left">
         ${homeIconBtnHtml("backToMenuBtn")}
-        <div class="crumb"><b>${cat.name}</b> / ${sub.name} / Quiz</div>
+        <div class="crumb"><button class="crumb-back" id="backToSubcatsBtn" title="Back to ${cat.name}">&larr; ${cat.name}</button> / ${sub.name} / Quiz</div>
       </div>
     </div>
   `;
@@ -1889,6 +1918,7 @@ function renderQuizPage(){
       </div>
     `;
     document.getElementById("backToMenuBtn").addEventListener("click", goToMenu);
+  wireCrumbBack();
     document.getElementById("backToStudyBtn").addEventListener("click", ()=> goToStudy(state.categoryId, state.subcatId));
     document.getElementById("retakeBtn").addEventListener("click", ()=> goToQuiz(state.categoryId, state.subcatId));
     return;
@@ -1920,6 +1950,7 @@ function renderQuizPage(){
     </div>
   `;
   document.getElementById("backToMenuBtn").addEventListener("click", goToMenu);
+  wireCrumbBack();
   appRoot.querySelectorAll(".quiz-choice-btn").forEach(btn=>{
     btn.addEventListener("click", ()=> selectQuizChoice(btn.dataset.choice));
   });
