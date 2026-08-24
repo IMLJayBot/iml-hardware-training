@@ -8,6 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Hardware Training">
 <meta name="mobile-web-app-capable" content="yes">
+<!-- Bumped on every deploy; the in-page update check below compares this
+     against a fresh, uncached fetch of this same file to detect new
+     versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
+<meta name="app-version" content="2026-08-24T18:30:24Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -43,6 +47,34 @@
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
   button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
   body{min-height:100vh;display:flex;flex-direction:column;}
+
+  .update-banner{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    text-align:center;
+    padding:10px 16px;
+    padding-top:calc(10px + env(safe-area-inset-top));
+  }
+  .update-banner[hidden]{display:none;}
+  .update-banner button{
+    background:#fff;
+    color:var(--navy);
+    border:none;
+    padding:6px 14px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    flex:none;
+  }
+  .update-banner button:hover{filter:brightness(1.08);}
 
   header.app-header{
     background:linear-gradient(120deg,var(--navy),var(--navy-2));
@@ -679,6 +711,16 @@
 </style>
 </head>
 <body>
+
+<!-- Sits in normal document flow (not fixed) so showing it just pushes the
+     header down rather than needing z-index/overlap handling. Hidden by
+     default; the auto-update check reveals it only when a newer build is
+     available AND the trainee is mid-study/mid-quiz, where reloading out
+     from under them would lose in-progress state. -->
+<div id="updateBanner" class="update-banner" hidden>
+  <span>A newer version of this app is available.</span>
+  <button id="updateBannerBtn" type="button">Refresh now</button>
+</div>
 
 <header class="app-header">
   <div class="brand" id="brandHome" role="button" tabindex="0" title="Back to Menu">
@@ -1594,6 +1636,54 @@ window.addEventListener("resize", () => {
 });
 
 renderAll();
+
+/* =========================================================
+   AUTO-UPDATE CHECK
+   -----------------------------------------------------------
+   GitHub Pages caches this file for several minutes, and a phone that has
+   this added to its home screen can hold an even staler copy indefinitely
+   since there's no obvious "pull to refresh" gesture in standalone mode.
+   To make sure trainees land on the latest build without needing to know
+   any of that: periodically re-fetch this same page with caching fully
+   bypassed, compare its embedded <meta name="app-version"> against the one
+   already loaded, and either reload immediately (if the trainee is just
+   browsing menus — nothing to lose) or surface a small banner they can act
+   on when ready (if they're mid-study or mid-quiz, where a surprise reload
+   would blow away their in-progress attempt).
+   ========================================================= */
+const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || "";
+
+function reloadToVersion(version){
+  location.href = location.pathname + "?v=" + encodeURIComponent(version);
+}
+
+function checkForAppUpdate(){
+  fetch(location.pathname + "?checkUpdate=" + Date.now(), { cache: "no-store" })
+    .then(r => r.text())
+    .then(html => {
+      const m = html.match(/<meta name="app-version" content="([^"]+)"/);
+      if(!m || !m[1] || m[1] === APP_VERSION) return;
+      if(state.view === "menu" || state.view === "subcategories"){
+        reloadToVersion(m[1]);
+      } else {
+        const banner = document.getElementById("updateBanner");
+        if(banner){
+          banner.hidden = false;
+          banner.dataset.version = m[1];
+        }
+      }
+    })
+    .catch(()=>{}); // offline or a network hiccup — just keep using what's loaded
+}
+
+document.getElementById("updateBannerBtn").addEventListener("click", ()=>{
+  const banner = document.getElementById("updateBanner");
+  const version = banner.dataset.version;
+  if(version) reloadToVersion(version);
+});
+
+checkForAppUpdate();
+setInterval(checkForAppUpdate, 5 * 60 * 1000);
 </script>
 </body>
 </html>
