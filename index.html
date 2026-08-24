@@ -309,18 +309,6 @@
     padding:4px 12px;
     border-radius:20px;
   }
-  .quiz-link-btn{
-    font-size:12.5px;
-    font-weight:700;
-    color:#fff;
-    background:var(--accent);
-    border:none;
-    padding:7px 15px;
-    border-radius:20px;
-    cursor:pointer;
-  }
-  .quiz-link-btn:hover{filter:brightness(1.08);}
-
   .photo-row{
     display:flex;
     gap:16px;
@@ -548,6 +536,28 @@
   .ctrl-btn:disabled{opacity:.4;cursor:default;}
   .ctrl-btn:hover:not(:disabled){filter:brightness(1.08);}
 
+  /* Compact, icon-only controls (Home in the study deck's bottom bar and
+     the quiz page's top bar; Knowledge Check alongside Prev/Next) — same
+     tap-target height as a full ctrl-btn, but square instead of pill-wide
+     so they read as navigation rather than a primary action. */
+  .icon-btn{
+    flex:0 0 auto;
+    width:44px;
+    padding:0;
+  }
+  .icon-btn svg{width:19px;height:19px;}
+  .home-icon-btn{
+    background:#97D89A;
+    border:1px solid #97D89A;
+    color:var(--navy);
+  }
+  .home-icon-btn:hover{background:#7FC784;border-color:#7FC784;}
+  .quiz-icon-btn{
+    background:var(--accent);
+    border:none;
+    color:#fff;
+  }
+
   .swipe-hint{
     text-align:center;
     font-size:12px;
@@ -657,6 +667,13 @@
       min-height:48px;
       padding:12px 10px;
       font-size:14px;
+    }
+    /* Overrides the flex:1 above so Home/Knowledge Check stay compact
+       squares instead of stretching to share space equally with Prev/Next. */
+    .icon-btn{
+      flex:0 0 44px;
+      min-height:48px;
+      padding:0;
     }
   }
 </style>
@@ -957,6 +974,27 @@ function placeholderSVG(){
   </svg>`;
 }
 
+function homeIconSVG(){
+  return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 11.5 12 4l8 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M6 10v9a1 1 0 0 0 1 1h3v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V20h3a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+// Compact icon-only "Back to Menu" control, used wherever a full text
+// button would eat too much space (the study deck's bottom control bar,
+// and the quiz page's top bar, which has no bottom bar of its own).
+function homeIconBtnHtml(id){
+  return `<button class="ctrl-btn icon-btn home-icon-btn" id="${id}" aria-label="Back to Menu" title="Back to Menu">${homeIconSVG()}</button>`;
+}
+
+function quizIconSVG(){
+  return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 11.5 11 13.5 15.5 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.8"/>
+  </svg>`;
+}
+
 /* ---------------------- navigation ---------------------- */
 function goToMenu(){
   state.view = "menu";
@@ -1153,24 +1191,34 @@ function renderStudyPage(){
   const sub = getSubcat(state.categoryId, state.subcatId);
   const canQuiz = sub.cards.length >= 2;
 
+  // No Home or Knowledge Check button up here on the main study view — both
+  // move down into the fixed control bar (thumb reach, Instagram-style),
+  // leaving this row as pure status (breadcrumb + progress) so it stays
+  // compact instead of competing with the card for space.
   const topbar = `
     <div class="deck-topbar">
       <div class="deck-topbar-left">
-        <button class="back-to-menu-btn" id="backToMenuBtn">&larr; Back to Menu</button>
         <div class="crumb"><b>${cat.name}</b> / ${sub.name}</div>
       </div>
       <div class="deck-topbar-right">
         ${sub.cards.length ? `<div class="progress-pill">Card ${state.cardIndex+1} of ${sub.cards.length}</div>` : ""}
-        ${canQuiz ? `<button class="quiz-link-btn" id="quizLinkBtn">Knowledge Check</button>` : ""}
       </div>
     </div>
   `;
 
   if(sub.cards.length === 0){
+    // The empty state has no bottom control bar to hold a Home icon, so it
+    // keeps one up top — this is the one place that compact icon still
+    // lives in the deck topbar rather than down with Prev/Next.
     document.body.classList.remove("has-controls");
     appRoot.innerHTML = `
       <div class="page-wrap deck-page">
-        ${topbar}
+        <div class="deck-topbar">
+          <div class="deck-topbar-left">
+            ${homeIconBtnHtml("backToMenuBtn")}
+            <div class="crumb"><b>${cat.name}</b> / ${sub.name}</div>
+          </div>
+        </div>
         <div class="empty-state">
           <h3>No cards yet</h3>
           <p>This subcategory is set up and ready — study cards for <b>${sub.name}</b> will show up here as they're added.</p>
@@ -1197,6 +1245,14 @@ function renderStudyPage(){
         : `<button class="ctrl-btn secondary" id="nextBtn" disabled>Next &rarr;</button>`)
     : `<button class="ctrl-btn secondary" id="nextBtn">Next &rarr;</button>`;
 
+  // A standalone "jump to Knowledge Check" icon rides along in the control
+  // bar for every card except the last — once you're on the last card, Next
+  // has already turned into the Knowledge Check button itself, so showing
+  // both at once would just be a confusing duplicate of the same action.
+  const quizIconHtml = (canQuiz && !isLast)
+    ? `<button class="ctrl-btn icon-btn quiz-icon-btn" id="quizIconBtn" aria-label="Knowledge Check" title="Knowledge Check">${quizIconSVG()}</button>`
+    : "";
+
   // If we've already measured this subcategory's tallest card (true for every
   // Prev/Next click after the first render of a deck), apply that height right
   // in the initial markup so the card is the right size from its very first
@@ -1217,22 +1273,23 @@ function renderStudyPage(){
       <div class="swipe-hint">Swipe the card left/right, or use Prev/Next</div>
 
       <div class="controls">
+        ${homeIconBtnHtml("homeBtn")}
         <button class="ctrl-btn secondary" id="prevBtn" ${state.cardIndex===0?'disabled':''}>&larr; Prev</button>
         ${nextControlHtml}
+        ${quizIconHtml}
       </div>
     </div>
   `;
   document.body.classList.add("has-controls");
 
-  document.getElementById("backToMenuBtn").addEventListener("click", goToMenu);
-  if(canQuiz){
-    document.getElementById("quizLinkBtn").addEventListener("click", ()=> goToQuiz(state.categoryId, state.subcatId));
-  }
+  document.getElementById("homeBtn").addEventListener("click", goToMenu);
   document.getElementById("prevBtn").addEventListener("click", goPrev);
   const nextBtn = document.getElementById("nextBtn");
   if(nextBtn) nextBtn.addEventListener("click", goNext);
   const toQuizBtn = document.getElementById("toQuizBtn");
   if(toQuizBtn) toQuizBtn.addEventListener("click", ()=> goToQuiz(state.categoryId, state.subcatId));
+  const quizIconBtn = document.getElementById("quizIconBtn");
+  if(quizIconBtn) quizIconBtn.addEventListener("click", ()=> goToQuiz(state.categoryId, state.subcatId));
 
   // Progress tracking: this card has now been shown to the trainee. Recorded
   // per-card (not just "opened the deck") so a subcategory only shows as
@@ -1369,10 +1426,13 @@ function renderQuizPage(){
   const sub = getSubcat(state.categoryId, state.subcatId);
   const q = state.quiz;
 
+  // The quiz page has no bottom control bar of its own (answering advances
+  // the flow inline), so — unlike the study page — its compact Home icon
+  // stays up here rather than moving down.
   const topbar = `
     <div class="deck-topbar">
       <div class="deck-topbar-left">
-        <button class="back-to-menu-btn" id="backToMenuBtn">&larr; Back to Menu</button>
+        ${homeIconBtnHtml("backToMenuBtn")}
         <div class="crumb"><b>${cat.name}</b> / ${sub.name} / Knowledge Check</div>
       </div>
     </div>
