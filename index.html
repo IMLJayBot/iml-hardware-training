@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-08-25T00:10:23Z">
+<meta name="app-version" content="2026-08-25T00:57:20Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -1487,6 +1487,7 @@ function goToStudy(categoryId, subcatId){
   state.cardIndex = 0;
   state.quiz = null;
   renderAll();
+  scrollCardToTop();
 }
 function goToQuiz(categoryId, subcatId){
   const sub = getSubcat(categoryId, subcatId);
@@ -1862,12 +1863,26 @@ function attachSwipeHandlers(cardEl, sub){
   cardEl.addEventListener("touchcancel", onEnd);
 }
 
+// Every card starts at the top. Without this, a trainee who scrolled down to
+// read the fact tiles lands halfway down the NEXT card, since replacing the
+// markup does not move the scroll position. Deliberately NOT inside
+// renderStudyPage(): the resize handler re-renders too, and rotating a phone
+// should leave you where you were reading.
+function scrollCardToTop(){
+  window.scrollTo(0, 0);
+  // Belt and braces for older iOS Safari, where the scrolling element
+  // reported by window.scrollTo is not always the one that actually moved.
+  if(document.scrollingElement) document.scrollingElement.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
 function goPrev(){
-  if(state.cardIndex>0){ state.cardIndex--; renderStudyPage(); }
+  if(state.cardIndex>0){ state.cardIndex--; renderStudyPage(); scrollCardToTop(); }
 }
 function goNext(){
   const sub = getSubcat(state.categoryId, state.subcatId);
-  if(state.cardIndex < sub.cards.length-1){ state.cardIndex++; renderStudyPage(); }
+  if(state.cardIndex < sub.cards.length-1){ state.cardIndex++; renderStudyPage(); scrollCardToTop(); }
 }
 
 /* ---------------------- page: Quiz (Knowledge Check) ---------------------- */
