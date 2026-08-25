@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-08-25T00:57:20Z">
+<meta name="app-version" content="2026-08-25T05:12:43Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -1730,6 +1730,15 @@ function renderStudyPage(){
         : `<button class="ctrl-btn secondary" id="nextBtn" disabled>Next &rarr;</button>`)
     : `<button class="ctrl-btn secondary" id="nextBtn">Next &rarr;</button>`;
 
+  // On the first card there is no previous card, so that slot would other-
+  // wise be a dead, greyed-out button sitting in the best thumb real estate
+  // on the screen. It becomes Back instead, leaving the deck for the
+  // subcategory list — the same trick Next already pulls at the far end,
+  // where it turns into the Quiz button on the last card.
+  const prevControlHtml = state.cardIndex === 0
+    ? `<button class="ctrl-btn secondary" id="backToSubcatsCtrl">&larr; Back</button>`
+    : `<button class="ctrl-btn secondary" id="prevBtn">&larr; Prev</button>`;
+
   // A standalone "jump to Knowledge Check" icon rides along in the control
   // bar for every card except the last — once you're on the last card, Next
   // has already turned into the Knowledge Check button itself, so showing
@@ -1759,7 +1768,7 @@ function renderStudyPage(){
 
       <div class="controls">
         ${homeIconBtnHtml("homeBtn")}
-        <button class="ctrl-btn secondary" id="prevBtn" ${state.cardIndex===0?'disabled':''}>&larr; Prev</button>
+        ${prevControlHtml}
         ${nextControlHtml}
         ${quizIconHtml}
       </div>
@@ -1769,7 +1778,10 @@ function renderStudyPage(){
 
   document.getElementById("homeBtn").addEventListener("click", goToMenu);
   wireCrumbBack();
-  document.getElementById("prevBtn").addEventListener("click", goPrev);
+  const prevBtn = document.getElementById("prevBtn");
+  if(prevBtn) prevBtn.addEventListener("click", goPrev);
+  const backCtrl = document.getElementById("backToSubcatsCtrl");
+  if(backCtrl) backCtrl.addEventListener("click", ()=> goToSubcategories(state.categoryId));
   const nextBtn = document.getElementById("nextBtn");
   if(nextBtn) nextBtn.addEventListener("click", goNext);
   const toQuizBtn = document.getElementById("toQuizBtn");
