@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-08-25T05:12:43Z">
+<meta name="app-version" content="2026-08-25T14:36:18Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -762,6 +762,20 @@
       min-height:48px;
       padding:0;
     }
+  }
+
+  /* ---- Phone density pass ----
+     Cards run ~915px against a ~589px budget on a 375x812 screen, so they
+     scroll however they are tuned. This does not try to win that fight; it
+     just stops the layout spending height it does not need. Whitespace only —
+     font sizes are untouched, because these get read at arm's length on a
+     shop floor. Worth ~54px per card. */
+  @media (max-width:600px){
+    .study-facts{ margin-top:14px; padding-top:12px; gap:8px; }
+    .fact-tile{ padding:9px 12px; gap:10px; }
+    .fact-text{ line-height:1.42; }
+    .fact-icon{ width:28px; height:28px; }
+    .photo-caption{ margin-top:6px; }
   }
 </style>
 </head>
@@ -1630,6 +1644,16 @@ function studyCardInnerHTML(c){
 // card's photos to finish decoding before measuring: aspect-ratio boxes can
 // under-report their height if read before the browser finishes decoding the
 // image data, especially the first time a given image is ever decoded.
+// Waits for a promise, but never longer than `ms`. Used to stop one
+// misbehaving image from stalling a measurement forever.
+function settleWithin(p, ms){
+  let timer;
+  return Promise.race([
+    Promise.resolve(p).catch(()=>{}),
+    new Promise(resolve => { timer = setTimeout(resolve, ms); })
+  ]).finally(()=> clearTimeout(timer));
+}
+
 async function measureMaxStudyCardHeight(sub, referenceEl){
   const width = referenceEl.getBoundingClientRect().width;
   const heights = await Promise.all(sub.cards.map(async c => {
@@ -1638,11 +1662,21 @@ async function measureMaxStudyCardHeight(sub, referenceEl){
     probe.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;left:-9999px;top:0;width:${width}px;`;
     probe.innerHTML = studyCardInnerHTML(c);
     document.body.appendChild(probe);
-    const imgs = Array.from(probe.querySelectorAll("img"));
-    await Promise.all(imgs.map(img => img.decode ? img.decode().catch(()=>{}) : Promise.resolve()));
-    const h = probe.scrollHeight;
-    document.body.removeChild(probe);
-    return h;
+    try {
+      // decode() does not reliably settle for an image that is never painted,
+      // and these probes are visibility:hidden by design. Left unbounded, a
+      // single hung image stranded the whole probe in the DOM — card markup,
+      // embedded photo and all — and they piled up as a trainee browsed.
+      // A capped wait can only cost a slightly-off height, which the next
+      // render corrects; a stranded probe never comes back.
+      const imgs = Array.from(probe.querySelectorAll("img"));
+      await Promise.all(imgs.map(img => img.decode ? settleWithin(img.decode(), 1500) : Promise.resolve()));
+      return probe.scrollHeight;
+    } finally {
+      // finally, not a trailing statement: an early return, a throw, or a
+      // timed-out decode must all still remove the probe.
+      probe.remove();
+    }
   }));
   return Math.max(0, ...heights);
 }
