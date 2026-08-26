@@ -1,0 +1,4 @@
+# Item Manager API token. Read by the /research skill.
+# NEVER commit this — GitHub Pages serves this repo publicly, so a committed
+# token would be readable by anyone who visits the site.
+.agent/itemmanager-token
