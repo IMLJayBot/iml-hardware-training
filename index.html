@@ -2445,12 +2445,22 @@ function renderSubcategoriesPage(){
 // typed instead of clearing it.
 let refQuery = "";
 
+// True when a deck holds exactly one entry, so the list between the button
+// and that entry is a screen with no decision on it.
+function refDeckIsSingle(sub){
+  return !!(sub && sub.cards && sub.cards.length === 1);
+}
+
 function goToReference(categoryId, subcatId){
   state.view = "reference";
   state.categoryId = categoryId;
   state.subcatId = subcatId;
   state.refCardId = null;
   state.quiz = null;
+  const sub = getSubcat(categoryId, subcatId);
+  // Straight to the entry. Everything that goes "back to the list" checks
+  // the same condition, so nothing lands on the screen we just skipped.
+  if(refDeckIsSingle(sub)) return goToRefDetail(sub.cards[0].id);
   renderAll();
 }
 
@@ -2720,13 +2730,24 @@ function renderRefDetailPage(){
     </div>` : "";
 
   const cat = getCategory(state.categoryId);
+  const single = refDeckIsSingle(sub);
   const i = refIndex();
   const atFirst = i <= 0;
   const atLast = i < 0 || i >= sub.cards.length - 1;
 
+  // A one-entry deck was opened straight from its button, so there is no
+  // list behind this page to go back to, and no sibling to step to either.
+  const crumbHtml = single
+    ? ""
+    : `<button class="back-to-menu-btn" id="backToRefBtn">&larr; ${sub.name}</button>`;
+  const stepHtml = single
+    ? ""
+    : `<button class="ctrl-btn secondary" id="refPrevBtn" ${atFirst ? "disabled" : ""}>&larr; Prev</button>
+        <button class="ctrl-btn secondary" id="refNextBtn" ${atLast ? "disabled" : ""}>Next &rarr;</button>`;
+
   appRoot.innerHTML = `
     <div class="page-wrap">
-      <button class="back-to-menu-btn" id="backToRefBtn">&larr; ${sub.name}</button>
+      ${crumbHtml}
       <div class="ref-detail" id="refDetailEl">
         <h2 class="ref-detail-title">${card.title || card.answer}</h2>
         ${photosHtml}
@@ -2735,20 +2756,21 @@ function renderRefDetailPage(){
 
       <div class="controls">
         <button class="ctrl-btn secondary" id="refUpBtn">&larr; ${cat.name}</button>
-        <button class="ctrl-btn secondary" id="refPrevBtn" ${atFirst ? "disabled" : ""}>&larr; Prev</button>
-        <button class="ctrl-btn secondary" id="refNextBtn" ${atLast ? "disabled" : ""}>Next &rarr;</button>
+        ${stepHtml}
         ${homeIconBtnHtml("refHomeBtn")}
       </div>
     </div>
   `;
   document.body.classList.add("has-controls");
 
-  document.getElementById("backToRefBtn")
-    .addEventListener("click", () => goToReference(state.categoryId, state.subcatId));
+  const crumbBtn = document.getElementById("backToRefBtn");
+  if(crumbBtn) crumbBtn.addEventListener("click", () => goToReference(state.categoryId, state.subcatId));
   document.getElementById("refUpBtn")
     .addEventListener("click", () => goToSubcategories(state.categoryId));
-  document.getElementById("refPrevBtn").addEventListener("click", () => refStep(-1));
-  document.getElementById("refNextBtn").addEventListener("click", () => refStep(1));
+  const prevBtn = document.getElementById("refPrevBtn");
+  if(prevBtn) prevBtn.addEventListener("click", () => refStep(-1));
+  const nextBtn = document.getElementById("refNextBtn");
+  if(nextBtn) nextBtn.addEventListener("click", () => refStep(1));
   document.getElementById("refHomeBtn").addEventListener("click", goToMenu);
 
   // Same gesture as the study deck, same limits as the buttons above: the
