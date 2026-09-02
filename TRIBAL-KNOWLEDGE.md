@@ -113,3 +113,17 @@ own.
 ## Exit devices
 
 *(nothing recorded yet)*
+
+## "Conventional cylinder" is a class, not a format (2026-09-02)
+
+**Source: Steve.** Conventional cylinder means any cylinder that is **not** an
+interchangeable core and not an IC housing. It is the category, so Key-in-Lever
+(KIL/KIK), mortise and rim cylinders are all conventional cylinders.
+
+It is therefore **not** a synonym for KIL, and no single format should be titled
+"Conventional Cylinder" — that claims the whole class for one member of it. Both
+the app's entry titles and one of its fact tiles had made exactly that mistake.
+
+Why it matters: it is the distinction the whole Cylinders section is organised
+around — conventional cylinders in one group, interchangeable cores and their
+housings in the other. Get the word wrong and the grouping stops making sense.
