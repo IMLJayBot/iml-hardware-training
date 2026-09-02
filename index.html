@@ -159,7 +159,11 @@
     cursor:pointer;
     display:flex;
     flex-direction:column;
+    justify-content:center;
     gap:7px;
+    /* One line of text per tile now, so give them all the same height
+       rather than letting a two-line name make one tile taller. */
+    min-height:74px;
     box-shadow:
       0 1px 0 rgba(255,255,255,0.9) inset,
       0 10px 20px rgba(18,35,59,0.09),
@@ -240,19 +244,9 @@
     color:var(--muted);
   }
   .tile-name{
-    font-size:17px;
+    font-size:17.5px;
     font-weight:700;
     color:var(--navy);
-  }
-  .tile-meta{
-    font-size:12.5px;
-    color:var(--muted);
-    /* The category tiles list what is inside them by name, so cap it at two
-       lines — a long list must not stretch one tile past its neighbours. */
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
   }
 
   /* Progress badges: a green "Studied" checkmark once every card in a
@@ -2232,17 +2226,6 @@ function goToQuiz(categoryId, subcatId){
 
 /* ---------------------- page: Menu (Categories) ---------------------- */
 
-// What a category tile says under its name: what is inside it, by name.
-// Reads the direct children a tap would reveal, so the tile and the next
-// screen agree. Trimmed to four, because a tile is a signpost.
-function categoryContentsMeta(cat){
-  const kids = childrenOf(cat).filter(n => !n.comingSoon);
-  if(!kids.length) return "Nothing here yet";
-  const names = kids.map(n => n.name);
-  const shown = names.slice(0, 4).join(", ");
-  return names.length > 4 ? `${shown} and ${names.length - 4} more` : shown;
-}
-
 // True while any openable deck still tracks study progress. Everything in
 // reference mode records none, so once the catalog is all reference the
 // progress controls have nothing left to act on and take themselves away.
@@ -2267,7 +2250,6 @@ function renderMenuPage(){
             <button class="${classes}" data-cat="${cat.id}" ${disabled ? "disabled aria-disabled=\"true\"" : ""}>
               ${badge}
               <div class="tile-name">${cat.name}</div>
-              <div class="tile-meta">${disabled ? "" : categoryContentsMeta(cat)}</div>
             </button>`;
         }).join("")}
       </div>
@@ -2291,14 +2273,6 @@ function renderMenuPage(){
 }
 
 /* ---------------------- page: Subcategories ---------------------- */
-// What a branch tile says under its name: how many decks it holds, and how
-// many cards in total, counting only what a trainee can actually open.
-function branchMeta(node){
-  const leaves = openLeavesUnder(node);
-  const cards = leaves.reduce((n,l)=> n + l.cards.length, 0);
-  if(!leaves.length) return "No cards yet";
-  return `${leaves.length} deck${leaves.length===1?"":"s"} &middot; ${cards} card${cards===1?"":"s"}`;
-}
 // True when this deck should open as a lookup rather than a study deck —
 // either it says so itself, or the whole category it sits in does.
 function isReferenceNode(categoryId, node){
@@ -2349,7 +2323,6 @@ function renderSubcategoriesPage(){
             <button class="${classes}" data-sub="${sub.id}" ${disabled ? "disabled aria-disabled=\"true\"" : ""}>
               ${badge}
               <div class="tile-name">${sub.name}</div>
-              <div class="tile-meta">${disabled ? '' : (empty ? 'Nothing here yet' : (branch ? branchMeta(sub) : (isReferenceNode(cat.id, sub) ? sub.cards.length + ' entr' + (sub.cards.length===1?'y':'ies') : sub.cards.length + ' card' + (sub.cards.length===1?'':'s'))))}</div>
               ${progressRowHtml}
             </button>`;
         }).join("")}
