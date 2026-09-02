@@ -127,3 +127,25 @@ the app's entry titles and one of its fact tiles had made exactly that mistake.
 Why it matters: it is the distinction the whole Cylinders section is organised
 around — conventional cylinders in one group, interchangeable cores and their
 housings in the other. Get the word wrong and the grouping stops making sense.
+
+## The brand names on the cylinder buttons are deliberate (2026-09-02)
+
+**Source: Steve.** Two of the interchangeable-core descriptions name a brand
+where a generic term would look more "correct". Both are right as written, and
+neither should be normalised away.
+
+**"Assa Abloy's large format interchangeable core."** Assa Abloy owns every
+brand in the LFIC list — Accentra, Corbin Russwin, Sargent, Assa and Medeco.
+So naming the parent is accurate, not a shortcut, and it is shorter than the
+five brands it stands in for.
+
+**"Best's small format interchangeable core."** This one is industry slang, and
+that is the point. Customers say "BEST core" for any small format
+interchangeable core — including when they want a cheaper aftermarket one. So a
+rep hears "BEST core" meaning the format, not the manufacturer.
+
+Why it matters: a well-meaning edit to "large format interchangeable core
+(multiple manufacturers)" or "small format interchangeable core" would read as
+more precise and would actually be *less* useful, because it drops the words
+the customer on the phone is using. This app exists to bridge what a customer
+says to what a rep needs to order.
