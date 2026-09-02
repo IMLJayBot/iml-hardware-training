@@ -2417,12 +2417,46 @@ function chevronRightSVG(){
 // that is its own outside photo; for a whole deck it is the first photo
 // anywhere under it, which lands on the representative one because the decks
 // lead with the thing itself before its prep and its paperwork.
+// A card that points at a control lug or a prep carries its photo as an SVG
+// wrapper: the raster underneath, then the red circle drawn on top of it.
+// That annotation is the whole point on a reference card and clutter on a
+// 62px button, so a thumbnail unwraps the SVG and uses the bare photo.
+//
+// Nothing is duplicated to do this — the clean raster is already inside the
+// SVG, so this costs no extra bytes in the file, and it picks up any card
+// annotated later without anything being listed by hand.
+const thumbUnwrapCache = new Map();
+
+function unwrapAnnotatedPhoto(src){
+  if(typeof src !== "string" || src.indexOf("data:image/svg+xml") !== 0) return src;
+  if(thumbUnwrapCache.has(src)) return thumbUnwrapCache.get(src);
+  let out = src;
+  try {
+    const comma = src.indexOf(",");
+    const meta = src.slice(0, comma);
+    const body = src.slice(comma + 1);
+    const svg = meta.indexOf(";base64") !== -1 ? atob(body) : decodeURIComponent(body);
+    // The wrapper writes the raster twice, as href and the legacy
+    // xlink:href, so either match yields the same photo.
+    const m = svg.match(/(?:xlink:)?href="(data:image\/[^"]+)"/);
+    if(m) out = m[1];
+  } catch(e){
+    // A wrapper we cannot read is not worth failing a row over — the
+    // annotated version still renders, circle and all.
+  }
+  thumbUnwrapCache.set(src, out);
+  return out;
+}
+
 function firstPhotoSrc(node){
   if(!node) return null;
   // An explicit thumbSrc wins: the photo that identifies a whole cylinder
-  // type is not always the one on its first card.
+  // type is not always the one on its first card. Taken as given, since it
+  // was chosen for this job rather than borrowed from a card.
   if(node.thumbSrc) return node.thumbSrc;
-  if(node.images && node.images.front && node.images.front.src) return node.images.front.src;
+  if(node.images && node.images.front && node.images.front.src){
+    return unwrapAnnotatedPhoto(node.images.front.src);
+  }
   const kids = (node.cards || []).concat(node.groups || []).concat(node.subcategories || []);
   for(const k of kids){
     const found = firstPhotoSrc(k);
