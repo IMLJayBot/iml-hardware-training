@@ -718,6 +718,144 @@
   }
   .empty-state h3{color:var(--navy);margin-top:0;}
 
+  /* ---------------- Reference view (lookup, not study) ----------------
+     A rep in the field knows what they want and wants it in two taps, so
+     this replaces the deck's card-by-card paging with a plain list plus a
+     filter box. No progress, no card counter, no quiz. */
+  .ref-search-wrap{
+    position:relative;
+    margin:18px 0 14px;
+  }
+  .ref-search{
+    width:100%;
+    padding:12px 14px 12px 40px;
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:11px;
+    box-shadow:0 1px 3px rgba(18,35,59,.05);
+  }
+  .ref-search:focus{
+    outline:none;
+    border-color:var(--accent-2);
+    box-shadow:0 0 0 3px rgba(24,95,172,.13);
+  }
+  .ref-search::placeholder{color:#93a1b0;}
+  .ref-search-icon{
+    position:absolute;
+    left:13px;
+    top:50%;
+    transform:translateY(-50%);
+    width:18px;height:18px;
+    color:#93a1b0;
+    pointer-events:none;
+  }
+  .ref-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .ref-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    width:100%;
+    text-align:left;
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    font-family:inherit;
+    cursor:pointer;
+    box-shadow:0 1px 3px rgba(18,35,59,.06);
+  }
+  .ref-row:hover{
+    border-color:var(--accent-2);
+    box-shadow:0 4px 14px rgba(18,35,59,.10);
+  }
+  .ref-row-thumb{
+    flex:none;
+    width:62px;
+    height:62px;
+    border-radius:9px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:#fff;
+  }
+  .ref-row-thumb img{width:100%;height:100%;object-fit:contain;display:block;}
+  .ref-row-body{flex:1;min-width:0;}
+  .ref-row-name{
+    font-size:16.5px;
+    font-weight:800;
+    color:var(--navy);
+    margin-bottom:3px;
+  }
+  .ref-row-sum{
+    font-size:12.8px;
+    line-height:1.45;
+    color:var(--muted);
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .ref-row-chev{
+    flex:none;
+    width:18px;height:18px;
+    color:#a9b6c4;
+  }
+  .ref-empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:13.5px;
+    padding:26px 10px;
+    border:1px dashed var(--line);
+    border-radius:12px;
+  }
+  /* Detail: the same photos and fact tiles as the study card, but with the
+     one-line recap promoted to the top — that sentence is usually the whole
+     answer, and the tiles are there when it is not. */
+  .ref-detail{
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    border:1px solid var(--line);
+    padding:26px 24px 24px;
+  }
+  .ref-detail-title{
+    font-size:26px;
+    font-weight:800;
+    color:var(--navy);
+    margin:0 0 10px;
+    text-align:center;
+  }
+  .ref-detail-recap{
+    font-size:14.5px;
+    line-height:1.55;
+    color:var(--ink);
+    background:linear-gradient(160deg,#f2f7fd,#e8f0f9);
+    border:1px solid #cfe0f1;
+    border-left:4px solid var(--accent);
+    border-radius:10px;
+    padding:13px 15px;
+    margin:0 0 20px;
+  }
+  .ref-detail .study-facts{
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  @media (max-width:600px){
+    .ref-row{padding:12px 13px;gap:12px;}
+    .ref-row-thumb{width:54px;height:54px;}
+    .ref-row-name{font-size:15.5px;}
+    .ref-detail{padding:20px 16px 18px;}
+    .ref-detail-title{font-size:22px;}
+    .ref-detail-recap{font-size:13.5px;padding:12px 13px;}
+  }
+
   @media (max-width:700px){
     .page-wrap{padding:22px 16px 40px;}
   }
@@ -895,6 +1033,8 @@ const CATALOG = [
         id: "lock-functions",
         featured: true,
         name: "Lock Functions",
+        // Reference deck: opens as a searchable list, not a study deck.
+        reference: true,
         // Hand-written quiz, two passes over the same eight functions:
         // identify the lockset from its photo, then pick the function from
         // what a customer describes. See buildAuthoredQuiz() for the fields.
@@ -1759,7 +1899,9 @@ let state = {
   // when the trainee has drilled that far. Only the tile page reads it.
   trail: [],
   cardIndex: 0,
-  quiz: null
+  quiz: null,
+  // Reference view only: which card's detail page is open.
+  refCardId: null
 };
 
 const appRoot = document.getElementById("appRoot");
@@ -2148,10 +2290,167 @@ function renderSubcategoriesPage(){
   appRoot.querySelectorAll(".tile[data-sub]").forEach(btn=>{
     if(btn.disabled) return;
     const node = findNode(cat, btn.dataset.sub);
-    btn.addEventListener("click", ()=> isBranch(node)
-      ? openGroup(btn.dataset.sub)
-      : goToStudy(state.categoryId, btn.dataset.sub));
+    btn.addEventListener("click", ()=> {
+      if(isBranch(node)) return openGroup(btn.dataset.sub);
+      // Reference decks skip the card-by-card study view entirely.
+      if(node && node.reference) return goToReference(state.categoryId, btn.dataset.sub);
+      goToStudy(state.categoryId, btn.dataset.sub);
+    });
   });
+}
+
+/* =========================================================
+   REFERENCE VIEW
+   -----------------------------------------------------------
+   The study deck teaches: it pages one card at a time, tracks what has been
+   viewed, and offers a Knowledge Check at the end. That is the wrong shape
+   for somebody who already did the training portal and is now standing in
+   front of a customer - they know the word "privacy" and want the recap in
+   two taps.
+
+   So this is the same card content with the teaching apparatus taken off:
+   a filterable list of every item in a deck, and a detail page you jump
+   straight to. No progress, no card counter, no quiz. It reuses
+   renderPhoto() and renderFacts() so a card written for one view renders
+   in both without any extra fields.
+
+   A deck opts in with `reference: true` beside its id/name.
+   ========================================================= */
+
+// Lives outside `state` on purpose: it is a scratch filter, not a place in
+// the app, so backing out of a detail page and returning keeps what was
+// typed instead of clearing it.
+let refQuery = "";
+
+function goToReference(categoryId, subcatId){
+  state.view = "reference";
+  state.categoryId = categoryId;
+  state.subcatId = subcatId;
+  state.refCardId = null;
+  state.quiz = null;
+  renderAll();
+}
+
+function goToRefDetail(cardId){
+  state.view = "refDetail";
+  state.refCardId = cardId;
+  renderAll();
+  window.scrollTo(0, 0);
+}
+
+function escapeAttr(s){
+  return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+}
+
+// Every typed word has to appear somewhere in the entry, so "bathroom" finds
+// Privacy off its Best For tile and "360" finds Classroom off its Operation
+// tile - a rep searching by what a customer described still lands on it.
+function refMatches(card, q){
+  const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!terms.length) return true;
+  const hay = [card.title, card.answer, card.description]
+    .concat((card.facts || []).map(f => f.label + " " + f.text))
+    .filter(Boolean).join(" ").toLowerCase();
+  return terms.every(t => hay.includes(t));
+}
+
+function searchIconSVG(){
+  return `<svg class="ref-search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+    <path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function chevronRightSVG(){
+  return `<svg class="ref-row-chev" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+// The outside photo, small, as a visual handle on the row. Someone who half
+// remembers what a function looks like recognises it faster than they read.
+function refRowThumbHtml(card){
+  const src = card.images && card.images.front && card.images.front.src;
+  if(!src) return "";
+  return `<div class="ref-row-thumb"><img src="${src}" alt=""></div>`;
+}
+
+function refListHtml(cards){
+  if(!cards.length){
+    return `<div class="ref-empty">Nothing matches that. Try another word &mdash; the search reads the whole entry, not just its name.</div>`;
+  }
+  return cards.map(c => `
+    <button class="ref-row" data-ref="${escapeAttr(c.id)}">
+      ${refRowThumbHtml(c)}
+      <div class="ref-row-body">
+        <div class="ref-row-name">${c.title || c.answer}</div>
+        ${c.description ? `<div class="ref-row-sum">${c.description}</div>` : ""}
+      </div>
+      ${chevronRightSVG()}
+    </button>`).join("");
+}
+
+function wireRefRows(){
+  appRoot.querySelectorAll(".ref-row[data-ref]").forEach(btn => {
+    btn.addEventListener("click", () => goToRefDetail(btn.dataset.ref));
+  });
+}
+
+function renderReferencePage(){
+  const sub = getSubcat(state.categoryId, state.subcatId);
+  const shown = sub.cards.filter(c => refMatches(c, refQuery));
+  appRoot.innerHTML = `
+    <div class="page-wrap">
+      <button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>
+      <h2 class="page-title">${sub.name}</h2>
+      <p class="page-lead">Pick one for a quick recap, or search by what it does.</p>
+      <div class="ref-search-wrap">
+        ${searchIconSVG()}
+        <input class="ref-search" id="refSearch" type="search" autocomplete="off"
+               placeholder="Search ${escapeAttr((sub.name || "").toLowerCase())}&hellip;"
+               value="${escapeAttr(refQuery)}">
+      </div>
+      <div class="ref-list" id="refList">${refListHtml(shown)}</div>
+    </div>
+  `;
+  wireCrumbBack();
+  wireRefRows();
+
+  const box = document.getElementById("refSearch");
+  // Repaint only the list, never the whole page: re-rendering the page would
+  // rebuild the input and lose focus and the caret on every keystroke.
+  box.addEventListener("input", () => {
+    refQuery = box.value;
+    const list = document.getElementById("refList");
+    list.innerHTML = refListHtml(sub.cards.filter(c => refMatches(c, refQuery)));
+    wireRefRows();
+  });
+}
+
+function renderRefDetailPage(){
+  const sub = getSubcat(state.categoryId, state.subcatId);
+  const card = sub.cards.find(c => c.id === state.refCardId);
+  if(!card){ goToReference(state.categoryId, state.subcatId); return; }
+
+  const photosHtml = card.images ? `
+    <div class="photo-row">
+      ${renderPhoto(card.images.front)}
+      ${renderPhoto(card.images.back)}
+    </div>` : "";
+
+  appRoot.innerHTML = `
+    <div class="page-wrap">
+      <button class="back-to-menu-btn" id="backToRefBtn">&larr; ${sub.name}</button>
+      <div class="ref-detail">
+        <h2 class="ref-detail-title">${card.title || card.answer}</h2>
+        ${card.description ? `<p class="ref-detail-recap">${card.description}</p>` : ""}
+        ${photosHtml}
+        ${renderFacts(card.facts)}
+      </div>
+    </div>
+  `;
+  document.getElementById("backToRefBtn")
+    .addEventListener("click", () => goToReference(state.categoryId, state.subcatId));
 }
 
 /* ---------------------- page: Deck (flashcards) ---------------------- */
@@ -2829,6 +3128,12 @@ function renderAll(){
     renderStudyPage();
   } else if(state.view === "quiz"){
     renderQuizPage();
+  } else if(state.view === "reference"){
+    document.body.classList.remove("has-controls");
+    renderReferencePage();
+  } else if(state.view === "refDetail"){
+    document.body.classList.remove("has-controls");
+    renderRefDetailPage();
   }
 }
 
