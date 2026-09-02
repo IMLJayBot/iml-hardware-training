@@ -814,9 +814,11 @@
     border:1px dashed var(--line);
     border-radius:12px;
   }
-  /* Detail: the same photos and fact tiles as the study card, but with the
-     one-line recap promoted to the top — that sentence is usually the whole
-     answer, and the tiles are there when it is not. */
+    /* Detail: the same photos and fact tiles as the study card, nothing else.
+     The card's `description` deliberately does NOT appear here — it restates
+     the Operation tile almost word for word, and reading the same sentence
+     twice on one screen makes the page feel padded. It earns its place on
+     the list rows, where it is the only summary there is. */
   .ref-detail{
     background:var(--card-bg);
     border-radius:var(--radius);
@@ -828,19 +830,8 @@
     font-size:26px;
     font-weight:800;
     color:var(--navy);
-    margin:0 0 10px;
-    text-align:center;
-  }
-  .ref-detail-recap{
-    font-size:14.5px;
-    line-height:1.55;
-    color:var(--ink);
-    background:linear-gradient(160deg,#f2f7fd,#e8f0f9);
-    border:1px solid #cfe0f1;
-    border-left:4px solid var(--accent);
-    border-radius:10px;
-    padding:13px 15px;
     margin:0 0 20px;
+    text-align:center;
   }
   .ref-detail .study-facts{
     margin-left:auto;
@@ -853,7 +844,6 @@
     .ref-row-name{font-size:15.5px;}
     .ref-detail{padding:20px 16px 18px;}
     .ref-detail-title{font-size:22px;}
-    .ref-detail-recap{font-size:13.5px;padding:12px 13px;}
   }
 
   @media (max-width:700px){
@@ -2443,7 +2433,6 @@ function renderRefDetailPage(){
       <button class="back-to-menu-btn" id="backToRefBtn">&larr; ${sub.name}</button>
       <div class="ref-detail">
         <h2 class="ref-detail-title">${card.title || card.answer}</h2>
-        ${card.description ? `<p class="ref-detail-recap">${card.description}</p>` : ""}
         ${photosHtml}
         ${renderFacts(card.facts)}
       </div>
