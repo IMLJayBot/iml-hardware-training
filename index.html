@@ -293,7 +293,12 @@
     background:#97D89A;
     border:1px solid #97D89A;
     color:var(--navy);
-    padding:9px 16px;
+    /* Height is fixed rather than left to the padding: these sit beside the
+       44px square icon buttons, and a text button that sizes itself lands
+       at 33px, which both looks wrong next to one and is under the minimum
+       for a reliable thumb tap. */
+    height:44px;
+    padding:0 16px;
     border-radius:9px;
     font-size:13.5px;
     font-weight:600;
@@ -722,6 +727,24 @@
      A rep in the field knows what they want and wants it in two taps, so
      this replaces the deck's card-by-card paging with a plain list plus a
      filter box. No progress, no card counter, no quiz. */
+  .ref-topbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  /* Both buttons to one height, or the pair reads as a mistake. The crumb
+     sizes itself from its padding and came out at 33px against the icon
+     button's 48px; 44px is the smaller of the two that is still a reliable
+     tap target, so both are pinned there rather than either following the
+     other. The bottom control bar keeps its taller 48px, which is sized for
+     thumb reach rather than to sit beside a text button. */
+  .ref-topbar .icon-btn{
+    min-height:44px;
+    height:44px;
+  }
+  .ref-topbar .back-to-menu-btn{margin-bottom:0;}
+
   .ref-search-wrap{
     position:relative;
     margin:18px 0 14px;
@@ -862,6 +885,9 @@
     .ref-row-sum{-webkit-line-clamp:3;}
     .ref-detail{padding:20px 16px 18px;}
     .ref-detail-title{font-size:22px;}
+    /* Four in the bar rather than the study deck's three, so they need to
+       be narrower before the category name starts truncating. */
+    .controls .ctrl-btn{padding:12px 6px;font-size:13px;}
     /* Side by side, two photos split a phone's width and land at about
        150px each — too small for the job, since on a lot of these entries
        the photo IS the answer. Stacked, each one gets the full width.
@@ -917,7 +943,7 @@
     .tile-name{font-size:14.5px;}
 
     .back-to-menu-btn{
-      padding:8px 14px;
+      padding:0 14px;
       font-size:13px;
       margin-bottom:12px;
     }
@@ -2399,6 +2425,24 @@ function goToRefDetail(cardId){
   window.scrollTo(0, 0);
 }
 
+// Prev/Next walk the deck's own order, not the search results. A rep who
+// searched "bathroom", opened Privacy and then tapped Next should get Entry
+// rather than a dead button, and neighbouring entries are related anyway.
+function refIndex(){
+  const sub = getSubcat(state.categoryId, state.subcatId);
+  if(!sub) return -1;
+  return sub.cards.findIndex(c => c.id === state.refCardId);
+}
+
+function refStep(delta){
+  const sub = getSubcat(state.categoryId, state.subcatId);
+  if(!sub) return;
+  const i = refIndex();
+  if(i < 0) return;
+  const next = sub.cards[i + delta];
+  if(next) goToRefDetail(next.id);
+}
+
 function escapeAttr(s){
   return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
 }
@@ -2538,6 +2582,11 @@ function refListHtml(cards){
   return cards.map(c => refRowHtml(c, c.title || c.answer, c.description)).join("");
 }
 
+function wireRefListHome(){
+  const b = document.getElementById("refListHomeBtn");
+  if(b) b.addEventListener("click", goToMenu);
+}
+
 function wireRefRows(){
   appRoot.querySelectorAll(".ref-row[data-ref]").forEach(btn => {
     btn.addEventListener("click", () => goToRefDetail(btn.dataset.ref));
@@ -2552,17 +2601,24 @@ function renderReferencePage(){
   if(!sub.cards.length){
     appRoot.innerHTML = `
       <div class="page-wrap">
-        <button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>
+        <div class="ref-topbar">
+          <button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>
+          ${homeIconBtnHtml("refListHomeBtn")}
+        </div>
         <h2 class="page-title">${sub.name}</h2>
         <div class="ref-empty">Nothing here yet.</div>
       </div>
     `;
     wireCrumbBack();
+    wireRefListHome();
     return;
   }
   appRoot.innerHTML = `
     <div class="page-wrap">
-      <button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>
+      <div class="ref-topbar">
+        <button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>
+        ${homeIconBtnHtml("refListHomeBtn")}
+      </div>
       <h2 class="page-title">${sub.name}</h2>
       <p class="page-lead">Pick one for a quick recap, or search by what it does.</p>
       <div class="ref-search-wrap">
@@ -2575,6 +2631,7 @@ function renderReferencePage(){
     </div>
   `;
   wireCrumbBack();
+  wireRefListHome();
   wireRefRows();
 
   const box = document.getElementById("refSearch");
@@ -2626,18 +2683,50 @@ function renderRefDetailPage(){
       ${renderPhoto(card.images.back)}
     </div>` : "";
 
+  const cat = getCategory(state.categoryId);
+  const i = refIndex();
+  const atFirst = i <= 0;
+  const atLast = i < 0 || i >= sub.cards.length - 1;
+
   appRoot.innerHTML = `
     <div class="page-wrap">
       <button class="back-to-menu-btn" id="backToRefBtn">&larr; ${sub.name}</button>
-      <div class="ref-detail">
+      <div class="ref-detail" id="refDetailEl">
         <h2 class="ref-detail-title">${card.title || card.answer}</h2>
         ${photosHtml}
         ${renderFacts(card.facts)}
       </div>
+
+      <div class="controls">
+        <button class="ctrl-btn secondary" id="refUpBtn">&larr; ${cat.name}</button>
+        <button class="ctrl-btn secondary" id="refPrevBtn" ${atFirst ? "disabled" : ""}>&larr; Prev</button>
+        <button class="ctrl-btn secondary" id="refNextBtn" ${atLast ? "disabled" : ""}>Next &rarr;</button>
+        ${homeIconBtnHtml("refHomeBtn")}
+      </div>
     </div>
   `;
+  document.body.classList.add("has-controls");
+
   document.getElementById("backToRefBtn")
     .addEventListener("click", () => goToReference(state.categoryId, state.subcatId));
+  document.getElementById("refUpBtn")
+    .addEventListener("click", () => goToSubcategories(state.categoryId));
+  document.getElementById("refPrevBtn").addEventListener("click", () => refStep(-1));
+  document.getElementById("refNextBtn").addEventListener("click", () => refStep(1));
+  document.getElementById("refHomeBtn").addEventListener("click", goToMenu);
+
+  // Same gesture as the study deck, same limits as the buttons above: the
+  // index is looked up fresh each time rather than captured, so it stays
+  // right if the deck is ever re-rendered underneath.
+  attachSwipeHandlers(document.getElementById("refDetailEl"), {
+    canPrev: () => refIndex() > 0,
+    canNext: () => {
+      const k = refIndex();
+      return k >= 0 && k < sub.cards.length - 1;
+    },
+    onPrev: () => refStep(-1),
+    onNext: () => refStep(1)
+  });
 }
 
 /* ---------------------- page: Deck (study cards) ---------------------- */
@@ -2874,7 +2963,12 @@ function renderStudyPage(){
   markCardViewed(state.categoryId, state.subcatId, card.id);
 
   const studyCardEl = document.getElementById("studyCardEl");
-  attachSwipeHandlers(studyCardEl, sub);
+  attachSwipeHandlers(studyCardEl, {
+    canPrev: () => state.cardIndex > 0,
+    canNext: () => state.cardIndex < sub.cards.length - 1,
+    onPrev:  goPrev,
+    onNext:  goNext
+  });
 
   if(cachedHeight === undefined){
     // Async: resolves after each card's photos finish decoding. If the user has
@@ -2886,13 +2980,17 @@ function renderStudyPage(){
   }
 }
 
-// Lets a trainee flip between study cards with a left/right swipe on the
-// card itself, in addition to the Prev/Next buttons. A vertical drag (page
-// scroll) is detected within the first few pixels of movement and left
-// alone — only a clearly horizontal drag past the threshold triggers a
-// card change, and it always mirrors goPrev()/goNext() so it can't advance
-// past the last card or before the first.
-function attachSwipeHandlers(cardEl, sub){
+// Left/right swipe on the card itself, alongside the Prev/Next buttons. A
+// vertical drag (page scroll) is detected within the first few pixels of
+// movement and left alone — only a clearly horizontal drag past the
+// threshold moves anywhere.
+//
+// `nav` supplies the four things this needs: whether there is anywhere to
+// go in each direction, and how to go there. It always asks before moving,
+// so a swipe can no more run off the end of a deck than a button press can.
+// The study deck and the reference detail pass their own, which is the only
+// difference between them — the gesture itself lives here once.
+function attachSwipeHandlers(cardEl, nav){
   if(!cardEl) return;
   const THRESHOLD = 60;
   let startX = 0, startY = 0, dx = 0, dragging = false, isHorizontal = null;
@@ -2928,20 +3026,18 @@ function attachSwipeHandlers(cardEl, sub){
     dragging = false;
     if(isHorizontal && Math.abs(dx) > THRESHOLD){
       const wantsNext = dx < 0;
-      const canGoNext = state.cardIndex < sub.cards.length - 1;
-      const canGoPrev = state.cardIndex > 0;
-      if(wantsNext && canGoNext){
+      if(wantsNext && nav.canNext()){
         cardEl.style.transition = "transform .18s ease, opacity .18s ease";
         cardEl.style.transform = `translateX(-120%) rotate(-8deg)`;
         cardEl.style.opacity = "0";
-        setTimeout(goNext, 160);
+        setTimeout(nav.onNext, 160);
         return;
       }
-      if(!wantsNext && canGoPrev){
+      if(!wantsNext && nav.canPrev()){
         cardEl.style.transition = "transform .18s ease, opacity .18s ease";
         cardEl.style.transform = `translateX(120%) rotate(8deg)`;
         cardEl.style.opacity = "0";
-        setTimeout(goPrev, 160);
+        setTimeout(nav.onPrev, 160);
         return;
       }
     }
@@ -3319,7 +3415,8 @@ function renderAll(){
     document.body.classList.remove("has-controls");
     renderReferencePage();
   } else if(state.view === "refDetail"){
-    document.body.classList.remove("has-controls");
+    // renderRefDetailPage adds has-controls itself — it is the one reference
+    // page with a bottom bar.
     renderRefDetailPage();
   }
 }
