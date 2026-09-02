@@ -247,12 +247,18 @@
   .tile-meta{
     font-size:12.5px;
     color:var(--muted);
+    /* The category tiles list what is inside them by name, so cap it at two
+       lines — a long list must not stretch one tile past its neighbours. */
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
   }
 
   /* Progress badges: a green "Studied" checkmark once every card in a
      subcategory has been viewed, and/or a best-score chip once the
-     Knowledge Check has been taken at least once. Shown on subcategory
-     tiles; category tiles get a rolled-up count in their meta line. */
+     Knowledge Check has been taken at least once. Study decks only — a
+     reference deck records nothing, so it shows neither. */
   .tile-progress-row{
     display:flex;
     align-items:center;
@@ -2225,50 +2231,58 @@ function goToQuiz(categoryId, subcatId){
 }
 
 /* ---------------------- page: Menu (Categories) ---------------------- */
+
+// What a category tile says under its name: what is inside it, by name.
+// Reads the direct children a tap would reveal, so the tile and the next
+// screen agree. Trimmed to four, because a tile is a signpost.
+function categoryContentsMeta(cat){
+  const kids = childrenOf(cat).filter(n => !n.comingSoon);
+  if(!kids.length) return "Nothing here yet";
+  const names = kids.map(n => n.name);
+  const shown = names.slice(0, 4).join(", ");
+  return names.length > 4 ? `${shown} and ${names.length - 4} more` : shown;
+}
+
+// True while any openable deck still tracks study progress. Everything in
+// reference mode records none, so once the catalog is all reference the
+// progress controls have nothing left to act on and take themselves away.
+function anyStudyDecks(){
+  return CATALOG.some(cat => openLeavesUnder(cat)
+    .some(l => l.cards.length > 0 && !isReferenceNode(cat.id, l)));
+}
+
 function renderMenuPage(){
   appRoot.innerHTML = `
     <div class="page-wrap menu-page">
-      <h2 class="page-title">Choose a Category</h2>
-      <p class="page-lead">Select a hardware category to start studying.</p>
+      <h2 class="page-title">What are you looking up?</h2>
+      <p class="page-lead">Pick a category, then the item you want.</p>
       <div class="tile-grid">
         ${CATALOG.map(cat => {
-          // Count only what a trainee can actually open. A subcategory marked
-          // comingSoon still carries its cards in the catalog, so counting them
-          // here would advertise cards the tile refuses to open.
-          const openSubs = cat.subcategories.filter(s => !s.comingSoon);
-          const subCount = openSubs.length;
-          // Cards can sit several levels down now, so count the open leaf
-          // decks rather than assuming every subcategory holds cards itself.
-          const openLeaves = openLeavesUnder(cat);
-          const cardCount = openLeaves.reduce((n,l)=>n+l.cards.length,0);
           const disabled = cat.comingSoon === true;
           const classes = ["tile", cat.featured ? "tile-featured" : "", disabled ? "tile-disabled" : ""].filter(Boolean).join(" ");
           const badge = disabled
             ? `<div class="tile-badge tile-badge-soon">Coming Soon</div>`
             : "";
-          const trackableSubs = openLeaves.filter(l => l.cards.length > 0);
-          const studiedCount = trackableSubs.filter(l => isSubStudied(cat.id, l.id, l)).length;
-          const progressMeta = (!disabled && trackableSubs.length)
-            ? ` &middot; ${studiedCount}/${trackableSubs.length} studied`
-            : "";
           return `
             <button class="${classes}" data-cat="${cat.id}" ${disabled ? "disabled aria-disabled=\"true\"" : ""}>
               ${badge}
               <div class="tile-name">${cat.name}</div>
-              <div class="tile-meta">${subCount} subcategor${subCount===1?'y':'ies'} &middot; ${cardCount} card${cardCount===1?'':'s'}${progressMeta}</div>
+              <div class="tile-meta">${disabled ? "" : categoryContentsMeta(cat)}</div>
             </button>`;
         }).join("")}
       </div>
+      ${anyStudyDecks() ? `
       <div class="menu-footer">
         <button class="reset-progress-btn" id="resetProgressBtn">Reset my study &amp; quiz progress</button>
-      </div>
+      </div>` : ""}
     </div>
   `;
   appRoot.querySelectorAll(".tile[data-cat]").forEach(btn=>{
     if(btn.disabled) return;
     btn.addEventListener("click", ()=> goToSubcategories(btn.dataset.cat));
   });
-  document.getElementById("resetProgressBtn").addEventListener("click", ()=>{
+  const resetBtn = document.getElementById("resetProgressBtn");
+  if(resetBtn) resetBtn.addEventListener("click", ()=>{
     if(confirm("Reset all study and quiz progress on this device? This can't be undone.")){
       resetAllProgress();
       renderMenuPage();
@@ -2307,7 +2321,7 @@ function renderSubcategoriesPage(){
     <div class="page-wrap subcat-page">
       <button class="back-to-menu-btn" id="backToMenuBtn">&larr; ${parentName}</button>
       <h2 class="page-title">${here.name}</h2>
-      <p class="page-lead">${state.trail.length ? crumb : "Choose a subcategory to start studying."}</p>
+      <p class="page-lead">${state.trail.length ? crumb : "Pick one to look it up."}</p>
       <div class="tile-grid">
         ${childrenOf(here).map(sub => {
           const branch = isBranch(sub);
@@ -2317,8 +2331,10 @@ function renderSubcategoriesPage(){
           const badge = disabled ? `<div class="tile-badge tile-badge-soon">Coming Soon</div>` : "";
           // A branch holds decks, not cards, so it carries no studied/score
           // chips of its own — those belong to the leaf the trainee opens.
-          const subProgress = (!branch && !disabled && !empty) ? getSubProgress(cat.id, sub.id) : null;
-          const studied = (!branch && !disabled && !empty) ? isSubStudied(cat.id, sub.id, sub) : false;
+          // A reference deck records nothing, so it shows no chips either.
+          const tracks = !branch && !disabled && !empty && !isReferenceNode(cat.id, sub);
+          const subProgress = tracks ? getSubProgress(cat.id, sub.id) : null;
+          const studied = tracks ? isSubStudied(cat.id, sub.id, sub) : false;
           let progressRowHtml = "";
           if(studied || (subProgress && subProgress.bestPct !== undefined)){
             const chips = [];
@@ -2333,7 +2349,7 @@ function renderSubcategoriesPage(){
             <button class="${classes}" data-sub="${sub.id}" ${disabled ? "disabled aria-disabled=\"true\"" : ""}>
               ${badge}
               <div class="tile-name">${sub.name}</div>
-              <div class="tile-meta">${disabled ? '' : (empty ? 'No cards yet' : (branch ? branchMeta(sub) : sub.cards.length + ' card' + (sub.cards.length===1?'':'s')))}</div>
+              <div class="tile-meta">${disabled ? '' : (empty ? 'Nothing here yet' : (branch ? branchMeta(sub) : (isReferenceNode(cat.id, sub) ? sub.cards.length + ' entr' + (sub.cards.length===1?'y':'ies') : sub.cards.length + ' card' + (sub.cards.length===1?'':'s'))))}</div>
               ${progressRowHtml}
             </button>`;
         }).join("")}
