@@ -862,6 +862,21 @@
     .ref-row-sum{-webkit-line-clamp:3;}
     .ref-detail{padding:20px 16px 18px;}
     .ref-detail-title{font-size:22px;}
+    /* Side by side, two photos split a phone's width and land at about
+       150px each — too small for the job, since on a lot of these entries
+       the photo IS the answer. Stacked, each one gets the full width.
+       Scoped to the reference detail: the study deck sizes its cards to a
+       measured uniform height and must not be reflowed underneath that. */
+    .ref-detail .photo-row{
+      flex-direction:column;
+      align-items:center;
+      gap:20px;
+      margin-bottom:4px;
+    }
+    .ref-detail .photo-col{
+      width:100%;
+      max-width:100%;
+    }
   }
 
   @media (max-width:700px){
