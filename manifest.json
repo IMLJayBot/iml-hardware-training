@@ -1,7 +1,7 @@
 {
-  "name": "Hardware Flashcard Training",
-  "short_name": "Hardware Training",
-  "description": "IML Security Supply's hardware training flashcards and Knowledge Check quizzes.",
+  "name": "Hardware Reference",
+  "short_name": "Hardware Reference",
+  "description": "IML Security Supply's hardware reference — look up lock functions, cylinder types and what they do.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
