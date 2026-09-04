@@ -1176,7 +1176,7 @@
 const CATALOG = [
   {
     id: "cylindrical-locksets",
-    name: "Locksets",
+    name: "Lock Functions",
     featured: true,
     subcategories: [
       {
@@ -2383,6 +2383,16 @@ function goToSubcategories(categoryId, trail){
   state.trail = trail ? trail.slice() : [];
   state.cardIndex = 0;
   state.quiz = null;
+  // At the top of a category with one openable child, go straight in.
+  // Every route here checks it, so nothing can land on the skipped screen.
+  if(!state.trail.length){
+    const only = loneOpenChild(getCategory(categoryId));
+    if(only){
+      return isReferenceNode(categoryId, only)
+        ? goToReference(categoryId, only.id)
+        : goToStudy(categoryId, only.id);
+    }
+  }
   renderAll();
 }
 // Open a branch tile: descend one level and re-render the same page.
@@ -2519,6 +2529,20 @@ function renderMenuPage(){
 /* ---------------------- page: Subcategories ---------------------- */
 // True when this deck should open as a lookup rather than a study deck —
 // either it says so itself, or the whole category it sits in does.
+// The one openable child of a category, when there is exactly one. Such a
+// level is a screen with no decision on it, so it is skipped and the child
+// opens instead - the same rule the one-entry decks follow, a level up.
+// Counted rather than named, so it stops applying by itself as soon as a
+// second child opens.
+function loneOpenChild(cat){
+  if(!cat || cat.comingSoon) return null;
+  const open = childrenOf(cat).filter(n => !n.comingSoon && !n.pending);
+  if(open.length !== 1) return null;
+  const only = open[0];
+  // A branch still has its own choices underneath, so it is not skippable.
+  return isBranch(only) ? null : only;
+}
+
 function isReferenceNode(categoryId, node){
   const cat = getCategory(categoryId);
   return !!((cat && cat.reference) || (node && node.reference));
@@ -2808,6 +2832,11 @@ function wireRefRows(){
 function renderReferencePage(){
   const sub = getSubcat(state.categoryId, state.subcatId);
   const shown = sub.cards.filter(c => refMatches(c, refQuery));
+  // Reached by skipping the category's own screen, so there is no level
+  // between this and the menu. The Home button beside the crumb already
+  // goes there, and a crumb pointing at a screen nobody saw is worse than
+  // no crumb.
+  const skipped = !state.trail.length && !!loneOpenChild(getCategory(state.categoryId));
   // Nothing to look up and nothing to filter: skip the search box entirely
   // rather than offering to search an empty list.
   if(!sub.cards.length){
@@ -2828,7 +2857,7 @@ function renderReferencePage(){
   appRoot.innerHTML = `
     <div class="page-wrap">
       <div class="ref-topbar">
-        <button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>
+        ${skipped ? "" : `<button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>`}
         ${homeIconBtnHtml("refListHomeBtn")}
       </div>
       <h2 class="page-title">${sub.name}</h2>
@@ -2896,6 +2925,7 @@ function renderRefDetailPage(){
     </div>` : "";
 
   const cat = getCategory(state.categoryId);
+  const skipped = !state.trail.length && !!loneOpenChild(cat);
   const single = refDeckIsSingle(sub);
   const i = refIndex();
   const atFirst = i <= 0;
@@ -2921,7 +2951,7 @@ function renderRefDetailPage(){
       </div>
 
       <div class="controls">
-        <button class="ctrl-btn secondary" id="refUpBtn">&larr; ${cat.name}</button>
+        ${skipped ? "" : `<button class="ctrl-btn secondary" id="refUpBtn">&larr; ${cat.name}</button>`}
         ${stepHtml}
         ${homeIconBtnHtml("refHomeBtn")}
       </div>
@@ -2931,8 +2961,8 @@ function renderRefDetailPage(){
 
   const crumbBtn = document.getElementById("backToRefBtn");
   if(crumbBtn) crumbBtn.addEventListener("click", () => goToReference(state.categoryId, state.subcatId));
-  document.getElementById("refUpBtn")
-    .addEventListener("click", () => goToSubcategories(state.categoryId));
+  const upBtn = document.getElementById("refUpBtn");
+  if(upBtn) upBtn.addEventListener("click", () => goToSubcategories(state.categoryId));
   const prevBtn = document.getElementById("refPrevBtn");
   if(prevBtn) prevBtn.addEventListener("click", () => refStep(-1));
   const nextBtn = document.getElementById("refNextBtn");
