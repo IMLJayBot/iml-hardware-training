@@ -881,6 +881,89 @@
     flex-direction:column;
     gap:10px;
   }
+
+  /* ---------------- Photo tiles (the cylinder index) ----------------
+     Two across so the photo is big enough to match against something in
+     the hand: about 130px on a phone, against 54px as a row thumbnail. */
+  .photo-tile-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+    margin-top:8px;
+  }
+  .photo-tile{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    background:linear-gradient(165deg,#ffffff 0%,#eef3fa 100%);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 12px 12px;
+    font-family:inherit;
+    cursor:pointer;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 8px 18px rgba(18,35,59,0.08),
+      0 2px 5px rgba(18,35,59,0.06);
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .photo-tile:hover{
+    border-color:var(--accent-2);
+    transform:translateY(-3px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 14px 26px rgba(18,35,59,0.14),
+      0 4px 9px rgba(18,35,59,0.08);
+  }
+  .photo-tile:active{transform:translateY(-1px);}
+  .photo-tile-frame{
+    width:100%;
+    aspect-ratio:1;
+    border-radius:11px;
+    overflow:hidden;
+    background:#fff;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .photo-tile-frame img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+  .photo-tile-name{
+    font-size:16px;
+    font-weight:800;
+    color:var(--navy);
+    text-align:center;
+    line-height:1.25;
+    /* Two lines' worth, so a name that wraps does not make its tile taller
+       than the one beside it. */
+    min-height:2.5em;
+    display:flex;
+    align-items:center;
+  }
+  /* Same treatment as a pending row: visible, clearly not ready, inert. */
+  .photo-tile-pending{
+    cursor:default;
+    opacity:.6;
+    box-shadow:none;
+  }
+  .photo-tile-pending:hover{
+    transform:none;
+    border-color:var(--line);
+    box-shadow:none;
+  }
+
+  @media (max-width:600px){
+    .photo-tile{padding:12px 10px 10px;gap:8px;}
+    .photo-tile-name{font-size:15px;}
+  }
   .ref-group-head{
     font-size:11px;
     font-weight:800;
@@ -1739,7 +1822,7 @@ const CATALOG = [
         }
       ] },
       { id: "fsic", name: "FSIC",
-        refGroup: "Interchangeable Cores and Housings",
+        refGroup: "Interchangeable Cores",
         blurb: "Schlage's full size interchangeable core. Oversized snowman shaped prep.",
         // Hand-written quiz. See buildAuthoredQuiz() for the field guide.
         quizQuestions: [
@@ -1831,7 +1914,7 @@ const CATALOG = [
         }
       ] },
       { id: "lfic", name: "LFIC",
-        refGroup: "Interchangeable Cores and Housings",
+        refGroup: "Interchangeable Cores",
         blurb: "Assa Abloy's large format interchangeable core. Oversized figure 8 prep.",
         noQuiz: true, cards: [
         {
@@ -1933,7 +2016,7 @@ const CATALOG = [
         }
       ] },
       { id: "sfic", name: "SFIC",
-        refGroup: "Interchangeable Cores and Housings",
+        refGroup: "Interchangeable Cores",
         blurb: "Best's small format interchangeable core. Compact figure 8 prep.",
         noQuiz: true, cards: [
         {
@@ -2051,9 +2134,9 @@ const CATALOG = [
           ]
         }
       ] },
-      { id: "mortise-ic-housing", name: "Mortise IC Housing",
+      { id: "mortise-ic-housing", name: "Mortise",
         pending: true,
-        refGroup: "Interchangeable Cores and Housings",
+        refGroup: "IC Housings",
         blurb: "The threaded mortise body on its own, ready for a core. Cam ordered separately.",
         // SCH20-059626 — Schlage 20-059 FSIC mortise cylinder housing, less
         // core, straight cam, 626. Mirrored so the core face points right.
@@ -2076,9 +2159,9 @@ const CATALOG = [
           ]
         }
       ] },
-      { id: "rim-ic-housing", name: "Rim IC Housing",
+      { id: "rim-ic-housing", name: "Rim",
         pending: true,
-        refGroup: "Interchangeable Cores and Housings",
+        refGroup: "IC Housings",
         blurb: "The rim body on its own, ready for a core. Flat tailpiece, same as a conventional rim.",
         // GMSICSR-26D — GMS SICSR26D Schlage FSIC/LFIC rim cylinder housing,
         // 626/US26D. Core face already points right, matching the mortise one.
@@ -2794,20 +2877,49 @@ function refRowHtml(node, name, summary){
     </button>`;
 }
 
-// Rows in catalog order, with a heading wherever refGroup changes. Grouping
-// is what makes the list scannable once it is longer than a handful: the
-// solid-body cylinders read as one set, the interchangeable-core formats and
-// their housings as another.
-function refGroupedListHtml(nodes){
+// A photo tile: the picture, then the name. Used on the cylinder index,
+// where a rep is holding a part and asking which one it is, so the photo
+// has to be the biggest thing on the screen rather than a thumbnail beside
+// a paragraph. The blurb is deliberately not rendered here.
+function refPhotoTileHtml(node){
+  const src = firstPhotoSrc(node);
+  const photo = src
+    ? `<img src="${src}" alt="">`
+    : `<div class="photo-placeholder">${placeholderSVG()}</div>`;
+  const body = `
+      <div class="photo-tile-frame">${photo}</div>
+      <div class="photo-tile-name">${node.name}</div>`;
+  if(node.pending){
+    return `
+      <div class="photo-tile photo-tile-pending">
+        <div class="tile-badge tile-badge-soon">Pending</div>
+        ${body}
+      </div>`;
+  }
+  return `
+    <button class="photo-tile" data-ref="${escapeAttr(node.id)}">
+      ${body}
+    </button>`;
+}
+
+// Tiles in catalog order, with a heading wherever refGroup changes. Once
+// the descriptions are gone the headings are the only words besides the
+// names, so they carry the whole conventional / interchangeable / housing
+// distinction on their own.
+function refGroupedGridHtml(nodes){
   let out = "";
   let current = null;
+  let open = false;
   nodes.forEach(n => {
     if(n.refGroup && n.refGroup !== current){
+      if(open) out += `</div>`;
       current = n.refGroup;
-      out += `<div class="ref-group-head">${current}</div>`;
+      out += `<div class="ref-group-head">${current}</div><div class="photo-tile-grid">`;
+      open = true;
     }
-    out += refRowHtml(n, n.name, n.blurb);
+    out += refPhotoTileHtml(n);
   });
+  if(open) out += `</div>`;
   return out;
 }
 
@@ -2898,14 +3010,12 @@ function renderRefIndexPage(){
     <div class="page-wrap">
       <button class="back-to-menu-btn" id="backToMenuBtn">&larr; ${state.trail.length ? "Back" : "Back to Menu"}</button>
       <h2 class="page-title">${here.name}</h2>
-      <p class="page-lead">Pick a type to see the photos and the recap.</p>
-      <div class="ref-list">
-        ${refGroupedListHtml(kids)}
-      </div>
+      <p class="page-lead">Pick a type.</p>
+      ${refGroupedGridHtml(kids)}
     </div>
   `;
   document.getElementById("backToMenuBtn").addEventListener("click", goUpOneLevel);
-  appRoot.querySelectorAll(".ref-row[data-ref]").forEach(btn => {
+  appRoot.querySelectorAll(".photo-tile[data-ref]").forEach(btn => {
     const node = findNode(cat, btn.dataset.ref);
     btn.addEventListener("click", () => isBranch(node)
       ? openGroup(btn.dataset.ref)
