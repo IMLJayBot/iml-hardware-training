@@ -150,20 +150,24 @@
     margin-top:20px;
   }
 
-  /* ---------------- Home page tiles ----------------
-     Four categories in a 2x2 square, icon over name. A name alone on a
-     wide short slab was what made these plain; the icon gives each one
-     something to recognise before the word is read, and the square grid
-     reads as an app rather than a list of links. Menu page only - the
-     subcategory tiles keep the plain treatment. */
-  .menu-page .tile-grid{
+  /* ---------------- Category and subcategory tiles ----------------
+     A 2x2 square, icon over name. A name alone on a wide short slab was
+     what made these plain; the icon gives each one something to recognise
+     before the word is read, and the square grid reads as an app rather
+     than a list of links.
+
+     Used by the home page and by the tiles under Locksets. The cylinder
+     types are a list with photos instead and never come through here. */
+  .menu-page .tile-grid,
+  .subcat-page .tile-grid{
     grid-template-columns:repeat(2,1fr);
     gap:14px;
     max-width:520px;
     margin-left:auto;
     margin-right:auto;
   }
-  .menu-page .tile{
+  .menu-page .tile,
+  .subcat-page .tile{
     min-height:154px;
     align-items:center;
     justify-content:center;
@@ -186,30 +190,35 @@
     transition:transform .15s ease, background .15s ease;
   }
   .tile-icon svg{width:33px;height:33px;}
-  .menu-page .tile-name{
+  .menu-page .tile-name,
+  .subcat-page .tile-name{
     font-size:16.5px;
     line-height:1.25;
   }
-  .menu-page .tile:hover .tile-icon{
+  .menu-page .tile:hover .tile-icon,
+  .subcat-page .tile:hover .tile-icon{
     transform:scale(1.06);
     background:#dfeafa;
   }
 
   /* Live categories: the icon chip carries the accent as a solid, which is
      what separates them from the gated ones at a glance. */
-  .menu-page .tile:not(.tile-disabled) .tile-icon{
+  .menu-page .tile:not(.tile-disabled) .tile-icon,
+  .subcat-page .tile:not(.tile-disabled) .tile-icon{
     background:linear-gradient(160deg,var(--accent),#1f6fc4);
     border-color:var(--accent);
     color:#fff;
     box-shadow:0 4px 12px rgba(24,95,172,0.28);
   }
-  .menu-page .tile:not(.tile-disabled):hover .tile-icon{
+  .menu-page .tile:not(.tile-disabled):hover .tile-icon,
+  .subcat-page .tile:not(.tile-disabled):hover .tile-icon{
     background:linear-gradient(160deg,#1a6ab8,#2a7ed0);
   }
 
   /* Gated ones stay legible rather than being greyed into illegibility -
      they are still telling you what is coming. */
-  .menu-page .tile.tile-disabled .tile-icon{
+  .menu-page .tile.tile-disabled .tile-icon,
+  .subcat-page .tile.tile-disabled .tile-icon{
     background:#eef1f5;
     border-color:var(--line);
     color:#9aa8b6;
@@ -277,7 +286,8 @@
   }
   /* The featured tint would fight the icon chip on the menu, where the chip
      already marks a category as live. */
-  .menu-page .tile.tile-featured{
+  .menu-page .tile.tile-featured,
+  .subcat-page .tile.tile-featured{
     border:1px solid var(--line);
     background:linear-gradient(165deg,#ffffff 0%,#eef3fa 100%);
     box-shadow:
@@ -285,8 +295,10 @@
       0 10px 20px rgba(18,35,59,0.09),
       0 2px 5px rgba(18,35,59,0.07);
   }
-  .menu-page .tile.tile-featured .tile-name{color:var(--navy);}
-  .menu-page .tile.tile-featured:hover{border-color:var(--accent-2);}
+  .menu-page .tile.tile-featured .tile-name,
+  .subcat-page .tile.tile-featured .tile-name{color:var(--navy);}
+  .menu-page .tile.tile-featured:hover,
+  .subcat-page .tile.tile-featured:hover{border-color:var(--accent-2);}
 
   /* Other top-level categories are marked "coming soon" and disabled
      until they have content, per the request to keep only Locksets live. */
@@ -2403,11 +2415,14 @@ function goToQuiz(categoryId, subcatId){
 
 /* ---------------------- page: Menu (Categories) ---------------------- */
 
-// One line icon per category, drawn rather than photographed: at 26px a
+// One line icon per tile, drawn rather than photographed: at this size a
 // photo of a lockset is a grey smudge, where a stroke drawing of one still
-// reads as a lever. Keyed by category id, so a category with no icon simply
-// gets none rather than the wrong one.
-function categoryIconSVG(id){
+// reads as a lever. Keyed by node id and used at both levels, so a tile
+// with no entry here simply gets no icon rather than the wrong one.
+//
+// Budget is about three strokes. Four reads as a blob — the Cylinders core
+// had to lose its control lug to learn that.
+function tileIconSVG(id){
   const icons = {
     // Locksets - the rose with a lever off it, arm turning down at the tip.
     // No inner circle: a ring plus a straight bar reads as a key this small.
@@ -2426,6 +2441,20 @@ function categoryIconSVG(id){
       <path d="M5 3.6h14v16.8H5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
       <path d="M3.4 12h17.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
       <path d="M8 9.6v4.8M16 9.6v4.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>`,
+    // Lock Functions - a rose face on with a keyhole: what the trim does,
+    // which is what separates passage from privacy from entry.
+    "lock-functions": `
+      <circle cx="12" cy="12" r="7.7" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="12" cy="10.1" r="2" stroke="currentColor" stroke-width="1.7"/>
+      <path d="M10.8 11.9 10.1 16.4h3.8l-0.7-4.5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>`,
+    // Identification - a magnifier over a lever. The magnifier is already
+    // this app's mark for identifying: it is on every Identification fact
+    // tile and on the search box.
+    "identification": `
+      <circle cx="10.4" cy="10.4" r="6.4" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M15 15 20.3 20.3" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
+      <circle cx="8.6" cy="9.3" r="1.7" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M10.3 9.3h3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
     // Door closers - the body at the head of the door, with its arm.
     "door-closers": `
       <path d="M3.6 4.4h9.6v5.2H3.6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
@@ -2463,7 +2492,7 @@ function renderMenuPage(){
           return `
             <button class="${classes}" data-cat="${cat.id}" ${disabled ? "disabled aria-disabled=\"true\"" : ""}>
               ${badge}
-              ${categoryIconSVG(cat.id)}
+              ${tileIconSVG(cat.id)}
               <div class="tile-name">${cat.name}</div>
             </button>`;
         }).join("")}
@@ -2537,6 +2566,7 @@ function renderSubcategoriesPage(){
           return `
             <button class="${classes}" data-sub="${sub.id}" ${disabled ? "disabled aria-disabled=\"true\"" : ""}>
               ${badge}
+              ${tileIconSVG(sub.id)}
               <div class="tile-name">${sub.name}</div>
               ${progressRowHtml}
             </button>`;
