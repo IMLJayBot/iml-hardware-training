@@ -185,7 +185,7 @@
     color:var(--accent);
     transition:transform .15s ease, background .15s ease;
   }
-  .tile-icon svg{width:29px;height:29px;}
+  .tile-icon svg{width:33px;height:33px;}
   .menu-page .tile-name{
     font-size:16.5px;
     line-height:1.25;
@@ -2418,13 +2418,12 @@ function categoryIconSVG(id){
       <circle cx="7.4" cy="9.6" r="4.3" stroke="currentColor" stroke-width="1.8"/>
       <path d="M11.7 9.6h6.1a2.1 2.1 0 0 1 2.1 2.1v2.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M4.2 17.4h6.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
-    // Cylinders - the threaded barrel from the side, keyway on the face.
+    // Cylinders - an SFIC core face: the figure 8, keyway in the lower lobe.
+    // One outline rather than two circles, so the lobes pinch at the waist
+    // instead of reading as a snowman, which is the FSIC shape.
     "cylinders": `
-      <path d="M4.6 8.2h9.2v7.6H4.6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-      <path d="M6.6 8.2v7.6M8.6 8.2v7.6M10.6 8.2v7.6M12.6 8.2v7.6" stroke="currentColor" stroke-width="1.1"/>
-      <path d="M13.8 6.2h3.4a1.6 1.6 0 0 1 1.6 1.6v8.4a1.6 1.6 0 0 1-1.6 1.6h-3.4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-      <circle cx="16.4" cy="11.2" r="1.3" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M16.4 12.5v2.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
+      <path d="M14.72 11.57A3.6 3.6 0 1 0 9.28 11.57A4.3 4.3 0 1 0 14.72 11.57Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M12 13.2v4.4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>`,
     // Exit devices - the door, with the push bar across it.
     "exit-devices": `
       <path d="M5 3.6h14v16.8H5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
