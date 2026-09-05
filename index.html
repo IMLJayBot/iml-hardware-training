@@ -2552,8 +2552,7 @@ function anyStudyDecks(){
 function renderMenuPage(){
   appRoot.innerHTML = `
     <div class="page-wrap menu-page">
-      <h2 class="page-title">What are you looking up?</h2>
-      <p class="page-lead">Pick a category, then the item you want.</p>
+      <h2 class="page-title">Choose a category.</h2>
       <div class="tile-grid">
         ${CATALOG.map(cat => {
           const disabled = cat.comingSoon === true;
