@@ -1275,6 +1275,10 @@ const CATALOG = [
         name: "Lock Functions",
         // Reference deck: opens as a searchable list, not a study deck.
         reference: true,
+        // ...except this one opens at its first card. The eight functions
+        // are a short fixed set in a sensible order, so paging them beats
+        // choosing from a list first.
+        openAtFirst: true,
         // Hand-written quiz, two passes over the same eight functions:
         // identify the lockset from its photo, then pick the function from
         // what a customer describes. See buildAuthoredQuiz() for the fields.
@@ -2699,6 +2703,14 @@ function refDeckIsSingle(sub){
   return !!(sub && sub.cards && sub.cards.length === 1);
 }
 
+// True when opening the deck should land on its first card rather than its
+// list. Either the list holds one row, or the deck asked to skip it.
+// Deliberately separate from refDeckIsSingle: both lose the list, but only
+// a one-entry deck loses Prev/Next with it.
+function refDeckOpensAtCard(sub){
+  return refDeckIsSingle(sub) || !!(sub && sub.openAtFirst && sub.cards.length);
+}
+
 function goToReference(categoryId, subcatId){
   state.view = "reference";
   state.categoryId = categoryId;
@@ -2706,9 +2718,9 @@ function goToReference(categoryId, subcatId){
   state.refCardId = null;
   state.quiz = null;
   const sub = getSubcat(categoryId, subcatId);
-  // Straight to the entry. Everything that goes "back to the list" checks
+  // Straight to the card. Everything that goes "back to the list" checks
   // the same condition, so nothing lands on the screen we just skipped.
-  if(refDeckIsSingle(sub)) return goToRefDetail(sub.cards[0].id);
+  if(refDeckOpensAtCard(sub)) return goToRefDetail(sub.cards[0].id);
   renderAll();
 }
 
@@ -3011,6 +3023,9 @@ function renderRefDetailPage(){
 
   const cat = getCategory(state.categoryId);
   const skipped = !state.trail.length && !!loneOpenChild(cat);
+  // No list behind this card, so no crumb back to one. Stepping is a
+  // separate question: a one-entry deck has nowhere to step.
+  const noList = refDeckOpensAtCard(sub);
   const single = refDeckIsSingle(sub);
   const i = refIndex();
   const atFirst = i <= 0;
@@ -3018,7 +3033,7 @@ function renderRefDetailPage(){
 
   // A one-entry deck was opened straight from its button, so there is no
   // list behind this page to go back to, and no sibling to step to either.
-  const crumbHtml = single
+  const crumbHtml = noList
     ? ""
     : `<button class="back-to-menu-btn" id="backToRefBtn">&larr; ${sub.name}</button>`;
   const stepHtml = single
