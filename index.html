@@ -980,6 +980,39 @@
     margin:14px 0 -2px 2px;
   }
   .ref-group-head:first-child{margin-top:2px;}
+  /* The name list: the same card as a reference row with the picture and
+     the summary taken out, so the two read as the same kind of thing. */
+  .ref-name-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:4px;
+  }
+  .ref-name-btn{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    width:100%;
+    text-align:left;
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:17px 18px;
+    font-family:inherit;
+    font-size:17px;
+    font-weight:800;
+    color:var(--navy);
+    cursor:pointer;
+    box-shadow:0 1px 3px rgba(18,35,59,.06);
+  }
+  .ref-name-btn:hover{
+    border-color:var(--accent-2);
+    box-shadow:0 4px 14px rgba(18,35,59,.10);
+  }
+  @media (max-width:600px){
+    .ref-name-btn{padding:15px 15px;font-size:16px;}
+  }
   .ref-row-pending{
     cursor:default;
     opacity:.62;
@@ -1275,10 +1308,9 @@ const CATALOG = [
         name: "Lock Functions",
         // Reference deck: opens as a searchable list, not a study deck.
         reference: true,
-        // ...except this one opens at its first card. The eight functions
-        // are a short fixed set in a sensible order, so paging them beats
-        // choosing from a list first.
-        openAtFirst: true,
+        // Names alone, and no search box: eight functions that are told
+        // apart by their names, all on one screen.
+        listStyle: "names",
         // Hand-written quiz, two passes over the same eight functions:
         // identify the lockset from its photo, then pick the function from
         // what a customer describes. See buildAuthoredQuiz() for the fields.
@@ -2703,7 +2735,9 @@ function refDeckIsSingle(sub){
 }
 
 // True when opening the deck should land on its first card rather than its
-// list. Either the list holds one row, or the deck asked to skip it.
+// list. Either the list holds one row, or the deck set `openAtFirst` to
+// skip it. No deck sets that today -- Lock Functions did, and going back to
+// a list is what took it off.
 // Deliberately separate from refDeckIsSingle: both lose the list, but only
 // a one-entry deck loses Prev/Next with it.
 function refDeckOpensAtCard(sub){
@@ -2909,6 +2943,15 @@ function refGroupedGridHtml(nodes){
   return out;
 }
 
+// Name-only buttons, for a deck whose entries are chosen by name.
+function refNameListHtml(cards){
+  return `<div class="ref-name-list">` + cards.map(c => `
+    <button class="ref-name-btn" data-ref="${escapeAttr(c.id)}">
+      <span>${c.title || c.answer}</span>
+      ${chevronRightSVG()}
+    </button>`).join("") + `</div>`;
+}
+
 function refListHtml(cards){
   if(!cards.length){
     return `<div class="ref-empty">Nothing matches that. Try another word &mdash; the search reads the whole entry, not just its name.</div>`;
@@ -2922,7 +2965,7 @@ function wireRefListHome(){
 }
 
 function wireRefRows(){
-  appRoot.querySelectorAll(".ref-row[data-ref]").forEach(btn => {
+  appRoot.querySelectorAll(".ref-row[data-ref], .ref-name-btn[data-ref]").forEach(btn => {
     btn.addEventListener("click", () => goToRefDetail(btn.dataset.ref));
   });
 }
@@ -2952,6 +2995,26 @@ function renderReferencePage(){
     wireRefListHome();
     return;
   }
+  // Names alone: the whole list is on one screen, so there is nothing to
+  // search and no summary to read before choosing.
+  if(sub.listStyle === "names"){
+    appRoot.innerHTML = `
+      <div class="page-wrap">
+        <div class="ref-topbar">
+          ${skipped ? "" : `<button class="back-to-menu-btn" id="backToSubcatsBtn">&larr; ${parentLevelName()}</button>`}
+          ${homeIconBtnHtml("refListHomeBtn")}
+        </div>
+        <h2 class="page-title">${sub.name}</h2>
+        <p class="page-lead">Pick a function.</p>
+        ${refNameListHtml(sub.cards)}
+      </div>
+    `;
+    wireCrumbBack();
+    wireRefListHome();
+    wireRefRows();
+    return;
+  }
+
   appRoot.innerHTML = `
     <div class="page-wrap">
       <div class="ref-topbar">
