@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-09-07T00:03:22Z">
+<meta name="app-version" content="2026-09-07T00:10:53Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -3147,11 +3147,12 @@ function renderPhoto(imgObj){
   // rather than in a tile below, so the outside lever's behaviour sits
   // under the outside lever.
   const note = imgObj.note ? `<div class="photo-note">${imgObj.note}</div>` : "";
-  // The label sits in the corner of the picture instead of on a line of
-  // its own: it is one word, it belongs to the photo, and the line it
-  // gives back goes to the note under it -- or, in the quiz, to the
-  // question. `labelInFrame` is how a caller asks for it without a note.
-  if(imgObj.note || imgObj.labelInFrame){
+  // With a note underneath, the label sits in the corner of the picture
+  // instead of on a line of its own: it is one word, it belongs to the
+  // photo, and the line it gives back goes to the note. Only these photos
+  // -- the quiz drops the note, so it keeps the caption, at a size where a
+  // pill would sit on the lockset.
+  if(imgObj.note){
     return `
       <div class="photo-col${wide}">
         <div class="photo-frame${nat} photo-frame-labelled">
@@ -3590,16 +3591,8 @@ function buildAuthoredQuiz(sub){
         // Rebuilt rather than borrowed: a reference card's photo carries a
         // note saying in plain words what the question is asking.
         images: images ? {
-          front: {
-            src: images.front.src,
-            label: spec.caption || images.front.label,
-            labelInFrame: !spec.caption && !!images.front.note,
-          },
-          back: images.back ? {
-            src: images.back.src,
-            label: images.back.label,
-            labelInFrame: !!images.back.note,
-          } : null,
+          front: { src: images.front.src, label: spec.caption || images.front.label },
+          back: images.back ? { src: images.back.src, label: images.back.label } : null,
         } : null,
       },
       choices: shuffle(spec.choices),
