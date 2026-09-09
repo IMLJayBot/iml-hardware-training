@@ -114,19 +114,36 @@ own.
 
 *(nothing recorded yet)*
 
-## "Conventional cylinder" is a class, not a format (2026-09-02)
+## "Conventional cylinder": a class on paper, a KIL at the counter (2026-09-02, extended 2026-09-09)
 
-**Source: Steve.** Conventional cylinder means any cylinder that is **not** an
+**Source: Steve.** Two things are true at once, and the second is the one that
+decides how to word a card.
+
+**The definition.** Conventional cylinder means any cylinder that is **not** an
 interchangeable core and not an IC housing. It is the category, so Key-in-Lever
 (KIL/KIK), mortise and rim cylinders are all conventional cylinders.
 
-It is therefore **not** a synonym for KIL, and no single format should be titled
-"Conventional Cylinder" — that claims the whole class for one member of it. Both
-the app's entry titles and one of its fact tiles had made exactly that mistake.
+**What customers say.** Spoken, "conventional cylinder" means a KIL — also
+called KIK or standard. Nobody asks for a "conventional mortise cylinder" or a
+"conventional rim cylinder." They ask for a mortise cylinder, or a mortise
+cylinder IC housing; a rim cylinder, or a rim cylinder IC housing. Mortise and
+rim get named by their body form and by whether they take a core, which leaves
+"conventional" doing the job of naming the third one. (IC is interchangeable
+core.)
 
-Why it matters: it is the distinction the whole Cylinders section is organised
-around — conventional cylinders in one group, interchangeable cores and their
-housings in the other. Get the word wrong and the grouping stops making sense.
+So a card may say a KIL is "also known as KIK, standard, and conventional
+cylinder" — that is the trade usage and it is what the app says. What is
+still wrong is titling one format "Conventional Cylinder" where it sits beside
+Mortise and Rim: in a list, that reads as a claim that the other two are not
+conventional. Hence the tile is **Key-In-Lever** under a **Conventional
+Cylinders** heading, which gets both halves right — the group carries the
+class, the tile carries the format.
+
+Why it matters: the class is the distinction the whole Cylinders section is
+organised around — conventional cylinders in one group, interchangeable cores
+and their housings in the other. Get the word wrong in a heading and the grouping
+stops making sense; refuse the spoken usage in a sentence and the app stops
+sounding like the people using it.
 
 ## The brand names on the cylinder buttons are deliberate (2026-09-02)
 
