@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-09-09T00:43:53Z">
+<meta name="app-version" content="2026-09-09T02:29:43Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -1014,35 +1014,53 @@
     gap:12px;
     width:100%;
     text-align:left;
-    background:var(--card-bg);
+    background:linear-gradient(165deg,#ffffff 0%,#eef3fa 100%);
     border:1px solid var(--line);
-    border-radius:12px;
-    padding:17px 18px;
+    border-left:5px solid var(--accent);
+    border-radius:var(--radius);
+    padding:16px 18px;
     font-family:inherit;
     font-size:17px;
     font-weight:800;
     color:var(--navy);
     cursor:pointer;
-    box-shadow:0 1px 3px rgba(18,35,59,.06);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 8px 18px rgba(18,35,59,0.08),
+      0 2px 5px rgba(18,35,59,0.06);
+    transition:transform .15s ease, box-shadow .15s ease;
   }
+  .ref-name-btn .ref-row-chev{color:var(--accent);}
+  /* The lift only. Borders are left alone on purpose: `border-color` is a
+     shorthand for all four sides, so hovering would wash out the left edge
+     that the whole treatment rests on. */
   .ref-name-btn:hover{
-    border-color:var(--accent-2);
-    box-shadow:0 4px 14px rgba(18,35,59,.10);
+    transform:translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 14px 26px rgba(18,35,59,0.14),
+      0 4px 9px rgba(18,35,59,0.08);
   }
-  /* Not a ninth function: filled, and set apart by a gap. */
+  .ref-name-btn:active{transform:translateY(-1px);}
+  /* Not a ninth function: filled, and set apart by a gap. Keeps an edge so
+     it still belongs to the set, in the lighter accent so it reads against
+     the navy. */
   .ref-name-quiz{
-    margin-top:6px;
-    background:var(--navy);
+    margin-top:8px;
+    background:linear-gradient(160deg,var(--navy),#1d3f68);
     border-color:var(--navy);
+    border-left-color:var(--accent-2);
     color:#fff;
   }
-  .ref-name-quiz .ref-row-chev{color:rgba(255,255,255,.75);}
+  .ref-name-quiz .ref-row-chev{color:rgba(255,255,255,.8);}
   .ref-name-quiz:hover{
-    border-color:var(--navy);
-    box-shadow:0 6px 18px rgba(18,35,59,.22);
+    box-shadow:
+      0 14px 26px rgba(18,35,59,0.22),
+      0 4px 9px rgba(18,35,59,0.12);
   }
   @media (max-width:600px){
     .ref-name-btn{padding:15px 15px;font-size:16px;}
+    .ref-name-list{gap:11px;}
   }
   .ref-row-pending{
     cursor:default;
