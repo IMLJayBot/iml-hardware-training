@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-09-14T22:43:21Z">
+<meta name="app-version" content="2026-09-14T23:39:21Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -1510,7 +1510,9 @@ const CATALOG = [
             },
             description: "Always open, no cylinder, uses a springlatch.",
             answer: "Passage",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "Break rooms and interior utility closets." }
+            ]
           },
           {
             id: "privacy",
@@ -1522,7 +1524,9 @@ const CATALOG = [
             },
             description: "Bathroom lock, no outside cylinder, inside locks with a push or push/turn button, can open with a coin or special tool, uses a springlatch.",
             answer: "Privacy",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "Single-occupant restrooms, dressing rooms, nursing suites." }
+            ]
           },
           {
             id: "entry",
@@ -1534,7 +1538,9 @@ const CATALOG = [
             },
             description: "Keyed outside cylinder, inside locks with a push/turn button, uses a deadlatch.",
             answer: "Entry",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "Perimeter doors, exterior entryways, multi-family units." }
+            ]
           },
           {
             id: "office",
@@ -1546,7 +1552,9 @@ const CATALOG = [
             },
             description: "Keyed outside cylinder, inside locks with a push-button, uses a deadlatch.",
             answer: "Office",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "Private offices, consulting rooms, conference spaces." }
+            ]
           },
           {
             id: "storeroom",
@@ -1558,7 +1566,9 @@ const CATALOG = [
             },
             description: "Always locked, key momentarily retracts the deadlatch, free egress inside.",
             answer: "Storeroom",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "Storage closets, mechanical/electrical rooms, IT server rooms, access control." }
+            ]
           },
           {
             id: "institutional-asylum",
@@ -1570,7 +1580,9 @@ const CATALOG = [
             },
             description: "Keyed cylinders on both sides, no free egress without a key — both levers stay locked at all times, uses a deadlatch.",
             answer: "Institution / Asylum",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "Detention facilities, psychiatric wards, secured holding areas." }
+            ]
           },
           {
             id: "classroom",
@@ -1582,7 +1594,9 @@ const CATALOG = [
             },
             description: "Key outside toggles the outside lever locked/unlocked with a full 360° turn; no interior lock button, free egress inside, uses a deadlatch.",
             answer: "Classroom",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "Traditional classrooms, seminar rooms, community centers, administrative shared spaces." }
+            ]
           },
           {
             id: "classroom-security-intruder",
@@ -1594,7 +1608,9 @@ const CATALOG = [
             },
             description: "Keyed cylinders on both sides; either key locks/unlocks the outside lever via full 360° turn, free egress inside at all times, uses a deadlatch.",
             answer: "Classroom Security / Intruder",
-            facts: []
+            facts: [
+              { icon: "bestFor", label: "Best For", text: "K-12 schools, higher-ed classrooms, lecture halls, lockdown-sensitive spaces." }
+            ]
           }
         ]
       },
@@ -2289,6 +2305,7 @@ const CATALOG = [
         }
       ] },
       { id: "rim-ic-housing", name: "Rim Housing",
+        pending: true,
         refGroup: "IC Housings",
         blurb: "The rim body on its own, ready for a core. Flat tailpiece, same as a conventional rim.",
         // ic-rim,jpg.jpg, sized so the housing fills the frame like the mortise one.
