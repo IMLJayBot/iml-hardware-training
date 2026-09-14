@@ -166,3 +166,29 @@ Why it matters: a well-meaning edit to "large format interchangeable core
 more precise and would actually be *less* useful, because it drops the words
 the customer on the phone is using. This app exists to bridge what a customer
 says to what a rep needs to order.
+
+## Sargent's LFIC mortise housing has a snowman pocket (2026-09-14)
+
+**Source: Steve.** A research lookup over the Schlage, Corbin Russwin, Sargent
+and Accentra price books, plus Allegion's knowledge base, concluded that FSIC
+and LFIC housings are one size class with **no** shape tell between them — our
+own ratified vocabulary carries them as a single `LFIC/FSIC` value, and GMS
+sells one part titled "Schlage FSIC/LFIC Mortise Housing". The honest answer
+from the documents was: read the brand, because the shape will not tell you.
+
+Steve's answer is narrower and more useful:
+
+- **A Sargent LFIC mortise housing is an oversized _snowman_ pocket** — the
+  bottom circle noticeably larger than the top — where a generic LFIC housing
+  is a plain oversized figure-8.
+- **Sargent housings come supplied with a Sargent shaped cam.** The cam is not
+  a separate choice on that brand the way it is on Corbin Russwin or Accentra.
+
+Why it matters: the documents say there is nothing to see, so a lookup that
+trusts only documents will keep telling a trainee to read the label. There is
+a real visual tell for at least one brand, and it is on the LFIC Mortise
+Housing card because of this entry rather than because a price book said so.
+
+Still open, and not answered by either the documents or Steve: whether
+Accentra, Assa, Corbin Russwin or Medeco housings have their own pocket
+signatures, or whether Sargent is the one exception.
