@@ -192,3 +192,28 @@ Housing card because of this entry rather than because a price book said so.
 Still open, and not answered by either the documents or Steve: whether
 Accentra, Assa, Corbin Russwin or Medeco housings have their own pocket
 signatures, or whether Sargent is the one exception.
+
+## The Sargent 30 Series is the economy line (2026-09-17)
+
+**Source: Steve.** Sargent's own catalogs never rank the 30 Series against the
+80 Series. There is no "economy", no duty level, no positioning sentence
+anywhere in either document — a lookup went through both and came back with
+nothing, which is why the card first shipped with no tier line at all.
+
+Steve's answer, flatly: **the 30 is the economy line.** It is on the card as
+"Economy Tier" because of this entry.
+
+What the catalogs *do* show, which corroborates it without stating it:
+
+- The 30 Series comes in **five powder-coat finishes only** (EB, ED, EN, EP,
+  EAB). The 80 Series adds plated brass, bronze, nickel, chrome and stainless.
+- The 30 Series carries **none of the 80 Series' electrified options** — no
+  alarm, delayed egress, electric latch retraction or SARGuide — and no
+  hurricane or tornado rated versions.
+
+Why it matters: the same gap will come up for other makers. Marks publishes no
+ranking between the M9900 and M8800 either, and those cards still carry no tier
+line. **Ask Steve rather than reading a tier out of a spec table** — and note
+that an AI search summary *did* call the 30 an "economy line panic device",
+which happened to be right but was not sourced from Sargent and must not be
+mistaken for one.
