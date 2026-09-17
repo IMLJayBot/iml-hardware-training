@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-09-17T17:21:41Z">
+<meta name="app-version" content="2026-09-17T17:29:49Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -554,13 +554,15 @@
     cursor:zoom-out;
   }
   /* Step between the photos on this card without backing out first. Hidden
-     at actual size, where the same drag pans the picture instead. */
+     at actual size, where the same drag pans the picture instead.
+     Sat low rather than centred: a panic bar is a wide, short picture, so a
+     button at the vertical middle lands squarely on the device. Down here it
+     clears the photo and still sits above the caption. */
   .lightbox-nav{
     position:fixed;
-    top:50%;
-    transform:translateY(-50%);
+    bottom:76px;
     width:44px;
-    height:64px;
+    height:56px;
     border:none;
     border-radius:8px;
     background:rgba(16,42,77,.55);
@@ -583,7 +585,7 @@
   @media (max-width:600px){
     /* On a phone the swipe is the gesture; the arrows only have to be
        reachable, not prominent. */
-    .lightbox-nav{width:38px;height:54px;font-size:26px;background:rgba(16,42,77,.4);}
+    .lightbox-nav{width:38px;height:48px;bottom:68px;font-size:26px;background:rgba(16,42,77,.45);}
   }
   .lightbox-close{
     position:fixed;
