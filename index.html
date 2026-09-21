@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-09-21T17:53:09Z">
+<meta name="app-version" content="2026-09-21T18:11:08Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -3553,12 +3553,14 @@ function goToQuiz(categoryId, subcatId){
 // had to lose its control lug to learn that.
 function tileIconSVG(id){
   const icons = {
-    // Locksets - the rose with a lever off it, arm turning down at the tip.
-    // No inner circle: a ring plus a straight bar reads as a key this small.
+    // Locksets - a Rhodes off its rose: the lever runs straight out, then the
+    // return angles back down at the tip. Drawn as one thick stroke rather
+    // than an outline, so the bar stays a bar at tile size; the rose is
+    // shaded because an outline over an outline merges into one shape here.
     "cylindrical-locksets": `
-      <circle cx="7.4" cy="9.6" r="4.3" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M11.7 9.6h6.1a2.1 2.1 0 0 1 2.1 2.1v2.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M4.2 17.4h6.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
+      <circle cx="17" cy="10.4" r="5.7" fill="currentColor" opacity="0.25"/>
+      <circle cx="17" cy="10.4" r="5.7" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M17 10.4H5.8l-1.3 3.4" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/>`,
     // Cylinders - an SFIC core face: the figure 8, keyway in the lower lobe.
     // One outline rather than two circles, so the lobes pinch at the waist
     // instead of reading as a snowman, which is the FSIC shape.
