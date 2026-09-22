@@ -11,7 +11,7 @@
 <!-- Bumped on every deploy; the in-page update check below compares this
      against a fresh, uncached fetch of this same file to detect new
      versions. See the AUTO-UPDATE CHECK block near the end of the script. -->
-<meta name="app-version" content="2026-09-22T00:23:56Z">
+<meta name="app-version" content="2026-09-22T00:31:09Z">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -560,7 +560,7 @@
      clears the photo and still sits above the caption. */
   .lightbox-nav{
     position:fixed;
-    bottom:76px;
+    bottom:calc(76px + env(safe-area-inset-bottom));
     width:44px;
     height:56px;
     border:none;
@@ -585,12 +585,16 @@
   @media (max-width:600px){
     /* On a phone the swipe is the gesture; the arrows only have to be
        reachable, not prominent. */
-    .lightbox-nav{width:38px;height:48px;bottom:68px;font-size:26px;background:rgba(16,42,77,.45);}
+    .lightbox-nav{width:38px;height:48px;bottom:calc(68px + env(safe-area-inset-bottom));font-size:26px;background:rgba(16,42,77,.45);}
   }
   .lightbox-close{
     position:fixed;
-    top:12px;
-    right:12px;
+    /* The page draws under the status bar (viewport-fit=cover with a
+       translucent bar), so a plain 12px puts this behind the clock on an
+       iPhone, where it cannot be tapped. Android has no such overlay, which
+       is why it only failed on one of them. */
+    top:calc(12px + env(safe-area-inset-top));
+    right:calc(12px + env(safe-area-inset-right));
     width:42px;
     height:42px;
     border-radius:50%;
@@ -610,7 +614,7 @@
     left:0;
     right:0;
     bottom:0;
-    padding:26px 14px 14px;
+    padding:26px 14px calc(14px + env(safe-area-inset-bottom));
     background:linear-gradient(to top, rgba(8,16,28,0.92), rgba(8,16,28,0));
     color:#fff;
     font-size:12.5px;
