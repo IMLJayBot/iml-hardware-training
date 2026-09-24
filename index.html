@@ -3767,7 +3767,8 @@ function renderMenuPage(){
     <div class="page-wrap menu-page">
       <h2 class="page-title">Choose a category.</h2>
       <div class="tile-grid">
-        ${CATALOG.map(cat => {
+        ${/* Alphabetical on the menu, whatever order CATALOG is written in. */ ""}
+        ${[...CATALOG].sort((a, b) => a.name.localeCompare(b.name)).map(cat => {
           const disabled = cat.comingSoon === true;
           const classes = ["tile", cat.featured ? "tile-featured" : "", disabled ? "tile-disabled" : ""].filter(Boolean).join(" ");
           const badge = disabled
