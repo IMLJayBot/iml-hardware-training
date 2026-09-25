@@ -2218,7 +2218,83 @@ const CATALOG = [
           answer: "ND Series Lever Styles",
           facts: []
         }
-      ] }
+      ] },
+      // Not a deck: a quiz over the whole Locksets section, reached from the
+      // Quiz Yourself button under the tiles. `quizOnly` keeps it out of the
+      // tile grid. Every answer is a brand and series: the skill being
+      // trained is "who makes this lock". Part 1 is the leverset alone
+      // (`photoPick: "front"` shows just the lock photo). Parts 2 and 3, the
+      // rosette and the lever, are drafted and waiting on Steve's review.
+      { id: "locksets-quiz", name: "Quiz Yourself",
+        quizOnly: true,
+        cards: [],
+        quizQuestions: [
+          {
+            photo: "schlage-nd",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Flat bar lever, squared return, flat rose",
+            choices: ["Schlage ND Series", "Arrow QL Series", "Falcon TM Series", "Sargent 10X Line"],
+            answer: "Schlage ND Series",
+          },
+          {
+            photo: "accentra-5400",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Curved lever on a rose that rises to a neck",
+            choices: ["Accentra 5400 Series", "Best 9K Series", "Falcon TM Series", "Corbin Russwin CLX3300"],
+            answer: "Accentra 5400 Series",
+          },
+          {
+            photo: "arrow-ql-series",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Flat rose with a raised ring",
+            choices: ["Arrow QL Series", "Schlage ND Series", "Marks 95 Series", "Falcon TM Series"],
+            answer: "Arrow QL Series",
+          },
+          {
+            photo: "best-9k",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Look at the core in the lever",
+            choices: ["Best 9K Series", "Accentra 5400 Series", "Falcon TM Series", "Sargent 10X Line"],
+            answer: "Best 9K Series",
+          },
+          {
+            photo: "corbin-russwin-clx3300",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Rounded edge on the rose",
+            choices: ["Corbin Russwin CLX3300", "Sargent 10X Line", "Schlage ND Series", "Marks 95 Series"],
+            answer: "Corbin Russwin CLX3300",
+          },
+          {
+            photo: "falcon-tm",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Rose flares out from a tall neck",
+            choices: ["Falcon TM Series", "Accentra 5400 Series", "Best 9K Series", "Schlage ND Series"],
+            answer: "Falcon TM Series",
+          },
+          {
+            photo: "marks-95",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Tall, straight collar on a deep rose",
+            choices: ["Marks 95 Series", "Sargent 10X Line", "Arrow QL Series", "Schlage ND Series"],
+            answer: "Marks 95 Series",
+          },
+          {
+            photo: "sargent-10x",
+            photoPick: "front",
+            question: "Who makes this leverset?",
+            hint: "Short collar on a deep, flat-faced rose",
+            choices: ["Sargent 10X Line", "Marks 95 Series", "Corbin Russwin CLX3300", "Schlage ND Series"],
+            answer: "Sargent 10X Line",
+          },
+        ]
+      }
     ]
   },
   {
@@ -5112,6 +5188,9 @@ const QUIZ_QUESTION_COUNT = 16;
                                  // outside and inside stays a two-photo question.
        photoSrc: "data:image/...", // OR embed one directly, for an item that
                                    // has no card of its own
+       photoPick: "front",         // optional, with `photo`: show just one of
+                                   // the card's photos -- "front", "back", or
+                                   // a number (front 0, back 1, then `more`)
        question: "Which cylinder type fits this lockset?",
        choices:  ["FSIC Core", "Conventional Cylinder", "GMSK003", "SFIC Core"],
        answer:   "Conventional Cylinder",   // must match one of `choices`
@@ -5156,9 +5235,20 @@ function buildAuthoredQuiz(sub){
   const questions = sub.quizQuestions.map(spec => {
     // Either an embedded photo of its own (one image), or every photo the
     // borrowed card carries (outside and inside, where it has both).
-    const images = spec.photoSrc
+    const borrowed = spec.photoSrc
       ? { front: { src: spec.photoSrc, label: spec.caption || "" }, back: null }
       : (spec.photo ? findCardImages(spec.photo) : null);
+    // `photoPick` narrows a borrowed card to one of its photos: "front",
+    // "back", or a number counting front = 0, back = 1, then `more`. The
+    // Locksets quiz asks about the lock and the rosette separately, and
+    // showing both at once would let one answer the other.
+    let images = borrowed;
+    if(borrowed && spec.photoPick !== undefined){
+      const all = [borrowed.front, borrowed.back].concat(borrowed.more || []);
+      const i = spec.photoPick === "front" ? 0 : spec.photoPick === "back" ? 1 : spec.photoPick;
+      images = all[i] ? { front: all[i], back: null } : null;
+      if(!images) console.warn("quiz: no photo", spec.photoPick, "on card", spec.photo);
+    }
     if(spec.photo && !spec.photoSrc && !images) console.warn("quiz: no card found with id", spec.photo);
     // One spec shape covers both: `answers: [...]` for a multi-answer question,
     // `answer: "..."` for the ordinary single one. Everything downstream reads
