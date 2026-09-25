@@ -1161,26 +1161,14 @@
     gap:10px;
     margin-top:4px;
   }
-  /* Trim rows: a paler blue with a navy edge, and a word tag, so a trim
-     never reads as one more series. */
+  /* Trim rows: a paler blue with a navy edge, so a trim never reads as
+     one more series. */
   .ref-name-btn.ref-name-btn-trim{
     background:linear-gradient(165deg,#f2f7fd 0%,#dce8f6 100%);
     border-left-color:var(--navy);
   }
-  .ref-trim-tag{
-    display:inline-block;
-    margin-left:10px;
-    padding:2px 8px;
-    border-radius:999px;
-    background:var(--navy);
-    color:#fff;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    vertical-align:2px;
-  }
-  .ref-trim-head{margin:10px 0 -2px 2px;}
+  .ref-list-head{margin:10px 0 -2px 2px;}
+  .ref-list-head:first-child{margin-top:2px;}
   .ref-name-btn{
     display:flex;
     align-items:center;
@@ -3232,6 +3220,13 @@ const CATALOG = [
   {
     id: "exit-devices",
     name: "Exit Devices",
+    // In a brand's series list the page title already names the brand, so
+    // rows drop it ("7100 Series", not "Accentra 7100"), and a brand with
+    // trims gets two headings: "<Brand> Exit Devices" and "<Brand> Exit
+    // Trims" (Steve, 2026-09-25). Card pages keep their full titles.
+    listDropsBrand: true,
+    seriesHead: "Exit Devices",
+    trimsHead: "Exit Trims",
     // Reference mode, like Cylinders: this category and its decks open as a
     // lookup rather than a study deck.
     reference: true,
@@ -3287,7 +3282,7 @@ const CATALOG = [
         {
           id: "accentra-7100-trims",
           trims: true,
-          listName: "Accentra 7100",
+          listName: "7100 Series",
           title: "Accentra 7100 Trims",
           photoGrid: true,
           // From 7100 Exit Trims.pdf, Steve's pages 22-27 of the ASSA ABLOY
@@ -3325,7 +3320,7 @@ const CATALOG = [
         {
           id: "accentra-2100-trims",
           trims: true,
-          listName: "Accentra 2100",
+          listName: "2100 Series",
           title: "Accentra 2100 Trims",
           photoGrid: true,
           // From 2100 Exit Trims.pdf, Steve's pages 13-21 of the ASSA ABLOY
@@ -3406,7 +3401,7 @@ const CATALOG = [
         {
           id: "adams-rite-3080",
           trims: true,
-          listName: "Adams Rite 3080",
+          listName: "3080 Entry Trim",
           title: "Adams Rite 3080 Entry Trim",
           // From Adams Rite AADSS1056780.pdf, the 3080 Series Entry Trim
           // sheet (catalog pp. 136-139, updated July 31, 2025), the link
@@ -3433,7 +3428,7 @@ const CATALOG = [
         {
           id: "adams-rite-eforce-3090",
           trims: true,
-          listName: "Adams Rite eForce 3090-150",
+          listName: "eForce 3090-150",
           title: "Adams Rite eForce 3090-150",
           // From Adams Rite eForce 3090 AADSS1057476.pdf, the eForce
           // 3090-150 Keyless Entry sheet (catalog pp. 140-141, updated
@@ -3785,7 +3780,7 @@ const CATALOG = [
         {
           id: "von-duprin-98-99-trims",
           trims: true,
-          listName: "Von Duprin 98/99",
+          listName: "98/99 Series",
           title: "Von Duprin 98/99 Trims",
           photoGrid: true,
           // From VON_98-99_SpecSheet.pdf (shop.imlss.com), the link Steve
@@ -4814,21 +4809,35 @@ function refNameListHtml(cards, sub){
     : "";
   const withThumb = (sub && sub.listThumbs) ? " ref-name-btn-withthumb" : "";
   // A card marked `trims: true` is not a series, so it is set apart: after
-  // the series, under its own heading, tinted, and tagged in words -- the
-  // tint alone is easy to miss on a phone and invisible to some eyes.
-  // `listName` is the shorter name for the list, where the tag already
-  // says "Trims"; the card's own page keeps its full title.
+  // the series, under its own heading, and tinted. The heading carries the
+  // words; the tint only helps the eye.
+  // `listName` is a card's shorter name for the list; the card's own page
+  // keeps its full title. A category can also drop the brand from every
+  // row (`listDropsBrand`) and name the two groups (`seriesHead`,
+  // `trimsHead`), which Exit Devices does.
+  const cat = getCategory(state.categoryId) || {};
+  const listName = c => {
+    if(c.listName) return c.listName;
+    const t = c.title || c.answer;
+    if(!cat.listDropsBrand || !sub || !t.startsWith(sub.name + " ")) return t;
+    const rest = t.slice(sub.name.length + 1);
+    return /series$/i.test(rest) ? rest : rest + " Series";
+  };
   const row = c => `
     <button class="ref-name-btn${withThumb}${c.trims ? " ref-name-btn-trim" : ""}" data-ref="${escapeAttr(c.id)}">
       ${refNameThumbHtml(c, sub)}
-      <span>${c.listName || c.title || c.answer}${c.trims ? `<span class="ref-trim-tag">Trims</span>` : ""}</span>
+      <span>${listName(c)}</span>
       ${chevronRightSVG()}
     </button>`;
   const series = cards.filter(c => !c.trims), trims = cards.filter(c => c.trims);
-  const trimsHtml = trims.length && series.length
-    ? `<div class="ref-group-head ref-trim-head">Trims</div>` + trims.map(row).join("")
-    : trims.map(row).join("");
-  return `<div class="ref-name-list">` + series.map(row).join("") + trimsHtml + quiz + `</div>`;
+  const head = (label, fallback) => `<div class="ref-group-head ref-list-head">${
+    label && sub ? sub.name + " " + label : fallback}</div>`;
+  const grouped = trims.length && series.length;
+  const html = grouped
+    ? head(cat.seriesHead, "") + series.map(row).join("") +
+      head(cat.trimsHead, "Trims") + trims.map(row).join("")
+    : cards.map(row).join("");
+  return `<div class="ref-name-list">` + html + quiz + `</div>`;
 }
 
 function refListHtml(cards){
