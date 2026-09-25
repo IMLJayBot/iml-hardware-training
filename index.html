@@ -3287,6 +3287,7 @@ const CATALOG = [
         {
           id: "accentra-7100-trims",
           trims: true,
+          listName: "Accentra 7100",
           title: "Accentra 7100 Trims",
           photoGrid: true,
           // From 7100 Exit Trims.pdf, Steve's pages 22-27 of the ASSA ABLOY
@@ -3324,6 +3325,7 @@ const CATALOG = [
         {
           id: "accentra-2100-trims",
           trims: true,
+          listName: "Accentra 2100",
           title: "Accentra 2100 Trims",
           photoGrid: true,
           // From 2100 Exit Trims.pdf, Steve's pages 13-21 of the ASSA ABLOY
@@ -3404,6 +3406,7 @@ const CATALOG = [
         {
           id: "adams-rite-3080",
           trims: true,
+          listName: "Adams Rite 3080",
           title: "Adams Rite 3080 Entry Trim",
           // From Adams Rite AADSS1056780.pdf, the 3080 Series Entry Trim
           // sheet (catalog pp. 136-139, updated July 31, 2025), the link
@@ -3430,6 +3433,7 @@ const CATALOG = [
         {
           id: "adams-rite-eforce-3090",
           trims: true,
+          listName: "Adams Rite eForce 3090-150",
           title: "Adams Rite eForce 3090-150",
           // From Adams Rite eForce 3090 AADSS1057476.pdf, the eForce
           // 3090-150 Keyless Entry sheet (catalog pp. 140-141, updated
@@ -3781,6 +3785,7 @@ const CATALOG = [
         {
           id: "von-duprin-98-99-trims",
           trims: true,
+          listName: "Von Duprin 98/99",
           title: "Von Duprin 98/99 Trims",
           photoGrid: true,
           // From VON_98-99_SpecSheet.pdf (shop.imlss.com), the link Steve
@@ -4811,10 +4816,12 @@ function refNameListHtml(cards, sub){
   // A card marked `trims: true` is not a series, so it is set apart: after
   // the series, under its own heading, tinted, and tagged in words -- the
   // tint alone is easy to miss on a phone and invisible to some eyes.
+  // `listName` is the shorter name for the list, where the tag already
+  // says "Trims"; the card's own page keeps its full title.
   const row = c => `
     <button class="ref-name-btn${withThumb}${c.trims ? " ref-name-btn-trim" : ""}" data-ref="${escapeAttr(c.id)}">
       ${refNameThumbHtml(c, sub)}
-      <span>${c.title || c.answer}${c.trims ? `<span class="ref-trim-tag">Trims</span>` : ""}</span>
+      <span>${c.listName || c.title || c.answer}${c.trims ? `<span class="ref-trim-tag">Trims</span>` : ""}</span>
       ${chevronRightSVG()}
     </button>`;
   const series = cards.filter(c => !c.trims), trims = cards.filter(c => c.trims);
