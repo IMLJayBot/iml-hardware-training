@@ -1167,8 +1167,17 @@
     background:linear-gradient(165deg,#f2f7fd 0%,#dce8f6 100%);
     border-left-color:var(--navy);
   }
-  .ref-list-head{margin:10px 0 -2px 2px;}
-  .ref-list-head:first-child{margin-top:2px;}
+  /* The two group headings in a brand's list ("Accentra Exit Devices",
+     "Accentra Exit Trims"): larger and in navy, so each group reads as its
+     own section rather than a caption. */
+  .ref-group-head.ref-list-head{
+    font-size:17px;
+    letter-spacing:.02em;
+    text-transform:none;
+    color:var(--navy);
+    margin:18px 0 0 2px;
+  }
+  .ref-group-head.ref-list-head:first-child{margin-top:6px;}
   .ref-name-btn{
     display:flex;
     align-items:center;
