@@ -2223,8 +2223,9 @@ const CATALOG = [
       // Quiz Yourself button under the tiles. `quizOnly` keeps it out of the
       // tile grid. Every answer is a brand and series: the skill being
       // trained is "who makes this lock". Part 1 is the leverset alone
-      // (`photoPick: "front"` shows just the lock photo). Parts 2 and 3, the
-      // rosette and the lever, are drafted and waiting on Steve's review.
+      // (`photoPick: "front"` shows just the lock photo). Part 2 is the
+      // rosette alone (`photoPick: "back"`). Part 3, the lever, is drafted
+      // and waiting on Steve's review.
       { id: "locksets-quiz", name: "Quiz Yourself",
         quizOnly: true,
         cards: [],
@@ -2291,6 +2292,70 @@ const CATALOG = [
             question: "Who makes this leverset?",
             hint: "Short collar on a deep, flat-faced rose",
             choices: ["Sargent 10X Line", "Marks 95 Series", "Corbin Russwin CLX3300", "Schlage ND Series"],
+            answer: "Sargent 10X Line",
+          },
+          {
+            photo: "schlage-nd",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "Flat face, small raised lip at the hole",
+            choices: ["Schlage ND Series", "Arrow QL Series", "Sargent 10X Line", "Corbin Russwin CLX3300"],
+            answer: "Schlage ND Series",
+          },
+          {
+            photo: "accentra-5400",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "Cone that rises to a neck",
+            choices: ["Accentra 5400 Series", "Falcon TM Series", "Best 9K Series", "Marks 95 Series"],
+            answer: "Accentra 5400 Series",
+          },
+          {
+            photo: "arrow-ql-series",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "Flat face, raised ring around the hole",
+            choices: ["Arrow QL Series", "Schlage ND Series", "Sargent 10X Line", "Corbin Russwin CLX3300"],
+            answer: "Arrow QL Series",
+          },
+          {
+            photo: "best-9k",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "Wide, low cone with a short collar",
+            choices: ["Best 9K Series", "Accentra 5400 Series", "Falcon TM Series", "Corbin Russwin CLX3300"],
+            answer: "Best 9K Series",
+          },
+          {
+            photo: "corbin-russwin-clx3300",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "The edge rolls over, no sharp corner",
+            choices: ["Corbin Russwin CLX3300", "Sargent 10X Line", "Marks 95 Series", "Schlage ND Series"],
+            answer: "Corbin Russwin CLX3300",
+          },
+          {
+            photo: "falcon-tm",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "Tall neck, flares wide to the door",
+            choices: ["Falcon TM Series", "Accentra 5400 Series", "Best 9K Series", "Marks 95 Series"],
+            answer: "Falcon TM Series",
+          },
+          {
+            photo: "marks-95",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "Deep sides, tall straight collar",
+            choices: ["Marks 95 Series", "Sargent 10X Line", "Falcon TM Series", "Corbin Russwin CLX3300"],
+            answer: "Marks 95 Series",
+          },
+          {
+            photo: "sargent-10x",
+            photoPick: "back",
+            question: "Whose rosette is this?",
+            hint: "Deep sides, short collar",
+            choices: ["Sargent 10X Line", "Marks 95 Series", "Corbin Russwin CLX3300", "Arrow QL Series"],
             answer: "Sargent 10X Line",
           },
         ]
