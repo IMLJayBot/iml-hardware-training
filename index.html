@@ -3237,7 +3237,6 @@ const CATALOG = [
         listStyle: "names",
         lead: "Pick a series.",
         listThumbs: true,
-        listThumb: "more",
         noQuiz: true, cards: [
         {
           id: "accentra-7100",
@@ -3274,7 +3273,6 @@ const CATALOG = [
         listStyle: "names",
         lead: "Pick a series.",
         listThumbs: true,
-        listThumb: "more",
         noQuiz: true, cards: [
         {
           id: "adams-rite-8800",
@@ -3389,7 +3387,6 @@ const CATALOG = [
         listStyle: "names",
         lead: "Pick a series.",
         listThumbs: true,
-        listThumb: "more",
         noQuiz: true, cards: [
         {
           id: "falcon-25r",
@@ -3435,7 +3432,6 @@ const CATALOG = [
         listStyle: "names",
         lead: "Pick a series.",
         listThumbs: true,
-        listThumb: "more",
         noQuiz: true, cards: [
         {
           id: "marks-m9900",
@@ -3502,7 +3498,6 @@ const CATALOG = [
         listStyle: "names",
         lead: "Pick a series.",
         listThumbs: true,
-        listThumb: "more",
         noQuiz: true, cards: [
         {
           id: "sargent-80",
@@ -3561,7 +3556,6 @@ const CATALOG = [
         listStyle: "names",
         lead: "Pick a series.",
         listThumbs: true,
-        listThumb: "more",
         noQuiz: true, cards: [
         {
           id: "von-duprin-99",
@@ -4631,14 +4625,7 @@ function refGroupedGridHtml(nodes){
 // card already carries.
 function refNameThumbHtml(card, sub){
   if(!sub || !sub.listThumbs || !card.images) return "";
-  // A deck can set `listThumb` for all its cards at once: "more" is the
-  // first of `images.more`. The exit device decks use it, because their
-  // front photo is the whole bar, a thin line at list size, and the push
-  // pad and end cap view carries the brand.
-  const which = card.listThumb || sub.listThumb;
-  const pick = which === "back" ? card.images.back
-    : which === "more" ? (card.images.more || [])[0]
-    : card.images.front;
+  const pick = card.listThumb === "back" ? card.images.back : card.images.front;
   const img = (pick && pick.src) ? pick : card.images.front;
   if(!img || !img.src) return "";
   return `<span class="ref-name-thumb"><img src="${unwrapAnnotatedPhoto(img.src)}" alt=""></span>`;
