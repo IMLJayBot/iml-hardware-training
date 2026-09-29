@@ -4397,12 +4397,34 @@ const CATALOG = [
   {
     id: "standalone",
     name: "Standalone",
-    // Placeholder for standalone locksets: cards to tell apart the different
-    // locks within each brand (Steve, 2026-09-29). Shows on the menu as
-    // Coming Soon until cards exist; drop comingSoon to open it.
-    comingSoon: true,
+    // Standalone locksets: cards to tell apart the different locks within
+    // each brand (Steve, 2026-09-29). Brand tiles, one card per lock, like
+    // Exit Devices.
     reference: true,
-    subcategories: []
+    alwaysIndex: true,
+    subcategories: [
+      { id: "alarm-lock", name: "Alarm Lock",
+        refGroup: "Standalone Locksets",
+        blurb: "The Trilogy DL2700, Alarm Lock's top standalone lockset.",
+        noQuiz: true, cards: [
+        {
+          id: "alarm-lock-dl2700",
+          title: "Alarm Lock DL2700",
+          // Facts from the IML Item Manager, item ALADL2700/26D (Trilogy T2
+          // Cylindrical Keypad Lock), each attribute cited there to a
+          // supplier document. The catalog has no photo; waiting on Steve's.
+          images: {
+            front: { src: "" }
+          },
+          description: "Alarm Lock's top standalone lockset.",
+          answer: "Alarm Lock DL2700",
+          facts: [
+            { icon: "secure", label: "Most Popular", text: "Alarm Lock's top standalone lockset. The one to order: <b>DL2700/26D</b>." },
+            { icon: "identify", label: "What It Is", text: "<ul><li><b>Trilogy T2</b> keypad cylindrical lever lock</li><li>Entry by <b>keypad / PIN code</b></li><li><b>Battery powered</b> &mdash; self-contained, not wired</li><li>Grade 1, non-handed</li><li>Conventional key cylinder</li></ul>" }
+          ]
+        }
+      ] }
+    ]
   },
   {
     id: "door-closers",
