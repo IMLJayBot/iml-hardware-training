@@ -4395,12 +4395,11 @@ const CATALOG = [
     ]
   },
   {
-    id: "mortise-locks",
-    name: "Mortise Locks",
-    // Placeholder for mortise lock identification cards by brand, so the
-    // sales team can tell one maker's mortise lock from another's (Steve,
-    // 2026-09-29). Shows on the menu as Coming Soon until cards exist; drop
-    // comingSoon to open it.
+    id: "standalone",
+    name: "Standalone",
+    // Placeholder for standalone locksets: cards to tell apart the different
+    // locks within each brand (Steve, 2026-09-29). Shows on the menu as
+    // Coming Soon until cards exist; drop comingSoon to open it.
     comingSoon: true,
     reference: true,
     subcategories: []
@@ -4837,9 +4836,20 @@ function tileIconSVG(id){
     // Door closers - the body seen side on with its arm folded up off one
     // end, and the sweep of the door shaded inside it. Five strokes read as
     // a blob at tile size; this is the body, the arm, and the sweep.
-    // Mortise locks - the lock seen from the door face: the faceplate edge
-    // on the left with the latchbolt through it, the case, the cylinder
-    // with its keyhole, and the lever. Drawn after the picture Steve sent.
+    // Standalone locksets - a keypad lock: the tall rounded body, the 3 x 3
+    // keypad in the top half, and the lever on its rose at the bottom.
+    // Drawn after the picture Steve sent.
+    "standalone": `
+      <rect x="5.6" y="2.6" width="11.2" height="18.8" rx="2.4" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="8" y="5" width="6.4" height="6.4" rx="0.5" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M10.13 5v6.4M12.27 5v6.4M8 7.13h6.4M8 9.27h6.4" stroke="currentColor" stroke-width="1.1"/>
+      <circle cx="10.2" cy="16.2" r="2.7" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M10.2 15h10.3a1.2 1.2 0 0 1 0 2.4H10.2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>`,
+    // Mortise locks - SAVED FOR LATER, not on the menu yet (Steve,
+    // 2026-09-29). The lock seen from the door face: the faceplate edge on
+    // the left with the latchbolt through it, the case, the cylinder with its
+    // keyhole, and the lever. Drawn after the picture Steve sent. To use it,
+    // add a category with id "mortise-locks".
     "mortise-locks": `
       <path d="M6 2.2v19.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       <path d="M6 3.6h9.4a1.6 1.6 0 0 1 1.6 1.6v13.6a1.6 1.6 0 0 1-1.6 1.6H6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
